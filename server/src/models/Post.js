@@ -22,6 +22,17 @@ const postSchema = new mongoose.Schema({
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  }],
+  reactions: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    type: {
+      type: String,
+      enum: ['like', 'love', 'haha', 'sad', 'care', 'angry'],
+      default: 'like'
+    }
   }]
 }, {
   timestamps: true

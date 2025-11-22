@@ -29,12 +29,19 @@ interface Reply {
   createdAt: string;
 }
 
+interface Reaction {
+  user: User;
+  type: "like" | "love" | "haha" | "sad" | "care" | "angry";
+  _id?: string;
+}
+
 interface PostType {
   _id: string;
   content: string;
   image?: string;
   author: User;
   likes: User[];
+  reactions: Reaction[];
   isPrivate: boolean;
   createdAt: string;
 }
@@ -52,14 +59,19 @@ export default function Post({ post, onUpdate }: PostProps) {
   const [replyContent, setReplyContent] = useState<{ [key: string]: string }>(
     {}
   );
-  const [showReplies, setShowReplies] = useState<{ [key: string]: boolean}>(
+  const [showReplies, setShowReplies] = useState<{ [key: string]: boolean }>(
     {}
   );
   const [showLikes, setShowLikes] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
 
+  // Find user's reaction if any
+  const userReaction = post.reactions?.find(
+    (reaction) => reaction.user._id === user?.id
+  );
   const isLiked = post.likes.some((like) => like._id === user?.id);
 
   const loadComments = async () => {
@@ -77,13 +89,162 @@ export default function Post({ post, onUpdate }: PostProps) {
     }
   }, [showComments]);
 
-  const handleLike = async () => {
+  const handleReaction = async (
+    reactionType: "like" | "love" | "haha" | "sad" | "care" | "angry"
+  ) => {
     try {
-      await api.post(`/posts/${post._id}/like`);
+      await api.post(`/posts/${post._id}/like`, { reactionType });
+      setShowReactionPicker(false);
       onUpdate();
     } catch (error) {
-      toast.error("Failed to like post");
+      toast.error("Failed to react to post");
     }
+  };
+
+  const getReactionIcon = (type: string) => {
+    switch (type) {
+      case "like":
+        return (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="19"
+            height="19"
+            viewBox="0 0 24 24"
+            fill="#1877F2"
+          >
+            <path d="M7.493 18.75c-.425 0-.82-.236-.975-.632A7.48 7.48 0 0 1 6 15.375c0-1.75.599-3.358 1.602-4.634.151-.192.373-.309.6-.397.473-.183.89-.514 1.212-.924a9.042 9.042 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V3a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23h-.777ZM2.331 10.727a11.969 11.969 0 0 0-.831 4.398 12 12 0 0 0 .52 3.507c.26.85 1.084 1.368 1.973 1.368H4.9c.445 0 .72-.498.523-.898a8.963 8.963 0 0 1-.924-3.977c0-1.708.476-3.305 1.302-4.666.245-.403-.028-.959-.5-.959H4.25c-.832 0-1.612.453-1.918 1.227Z" />
+          </svg>
+        );
+      case "love":
+        return (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="19"
+            height="19"
+            viewBox="0 0 19 19"
+            fill="none"
+          >
+            <path
+              fill="#F33E58"
+              d="M9.5 17.5c-.2 0-.4-.1-.5-.2-1.6-1.4-3-2.6-4.1-3.7-1.5-1.4-2.6-2.6-3.3-3.5C.6 8.9.2 7.8.2 6.6c0-1.2.4-2.2 1.2-3 .8-.8 1.8-1.2 3-1.2 1 0 1.9.3 2.6.9.4.3.7.7 1 1.1.3-.4.6-.8 1-1.1.7-.6 1.6-.9 2.6-.9 1.2 0 2.2.4 3 1.2.8.8 1.2 1.8 1.2 3 0 1.2-.4 2.3-1.3 3.5-.7.9-1.8 2.1-3.3 3.5-1.1 1.1-2.5 2.3-4.1 3.7-.1.1-.3.2-.5.2z"
+            />
+          </svg>
+        );
+      case "haha":
+        return (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="19"
+            height="19"
+            fill="none"
+            viewBox="0 0 19 19"
+          >
+            <path
+              fill="#FFCC4D"
+              d="M9.5 19a9.5 9.5 0 100-19 9.5 9.5 0 000 19z"
+            />
+            <path
+              fill="#664500"
+              d="M9.5 11.083c-1.912 0-3.181-.222-4.75-.527-.358-.07-1.056 0-1.056 1.055 0 2.111 2.425 4.75 5.806 4.75 3.38 0 5.805-2.639 5.805-4.75 0-1.055-.697-1.125-1.055-1.055-1.57.305-2.838.527-4.75.527z"
+            />
+            <path
+              fill="#fff"
+              d="M4.75 11.611s1.583.528 4.75.528 4.75-.528 4.75-.528-1.056 2.111-4.75 2.111-4.75-2.11-4.75-2.11z"
+            />
+            <path
+              fill="#664500"
+              d="M6.333 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847zM12.667 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847z"
+            />
+          </svg>
+        );
+      case "sad":
+        return (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="19"
+            height="19"
+            fill="none"
+            viewBox="0 0 19 19"
+          >
+            <path
+              fill="#FFCC4D"
+              d="M9.5 19a9.5 9.5 0 100-19 9.5 9.5 0 000 19z"
+            />
+            <path
+              fill="#5DADEC"
+              d="M6.527 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847zM12.473 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847z"
+            />
+            <path
+              fill="#664500"
+              d="M4.75 13.417c0-.359.698-.359 1.056-.289 1.569.305 2.838.527 4.75.527s3.181-.222 4.75-.527c.358-.07 1.056-.07 1.056.289 0 1.055-2.425 2.638-5.806 2.638-3.38 0-5.806-1.583-5.806-2.638z"
+            />
+            <path
+              fill="#5DADEC"
+              d="M6.916 12.4a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM14.084 12.4a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+            />
+          </svg>
+        );
+      case "care":
+        return (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="19"
+            height="19"
+            fill="none"
+            viewBox="0 0 19 19"
+          >
+            <path
+              fill="#FFCC4D"
+              d="M9.5 19a9.5 9.5 0 100-19 9.5 9.5 0 000 19z"
+            />
+            <path
+              fill="#F4900C"
+              d="M9.5 3.167c-3.5 0-6.333 2.833-6.333 6.333h1.583c0-2.617 2.133-4.75 4.75-4.75 2.617 0 4.75 2.133 4.75 4.75h1.583c0-3.5-2.833-6.333-6.333-6.333z"
+            />
+            <path
+              fill="#F33E58"
+              d="M12.667 10.292c0 1.75-1.417 3.166-3.167 3.166-1.75 0-3.167-1.416-3.167-3.166h6.334z"
+            />
+            <path
+              fill="#664500"
+              d="M7.125 8.208c.438 0 .792-.354.792-.791a.792.792 0 00-1.584 0c0 .437.355.791.792.791zM11.875 8.208c.438 0 .792-.354.792-.791a.792.792 0 00-1.584 0c0 .437.355.791.792.791z"
+            />
+          </svg>
+        );
+      case "angry":
+        return (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="19"
+            height="19"
+            fill="none"
+            viewBox="0 0 19 19"
+          >
+            <path
+              fill="#F4900C"
+              d="M9.5 19a9.5 9.5 0 100-19 9.5 9.5 0 000 19z"
+            />
+            <path
+              fill="#664500"
+              d="M6.333 9.5c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847S5.604 9.5 6.333 9.5zM12.667 9.5c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847z"
+            />
+            <path
+              fill="#664500"
+              d="M5.542 6.333L7.917 7.125 5.542 5.542zM13.458 6.333L11.083 7.125l2.375-1.583z"
+            />
+            <path
+              fill="#664500"
+              d="M9.5 14.25c1.912 0 3.181-.222 4.75-.527.358-.07 1.056 0 1.056 1.055 0 2.111-2.425 4.75-5.806 4.75-3.38 0-5.806-2.639-5.806-4.75 0-1.055.698-1.125 1.056-1.055 1.57.305 2.838.527 4.75.527z"
+            />
+          </svg>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getReactionText = (type: string) => {
+    return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
   const handleComment = async (e: React.FormEvent) => {
@@ -188,7 +349,13 @@ export default function Post({ post, onUpdate }: PostProps) {
 
   const isOwnPost = user?.id === post.author._id;
 
-  console.log('post author ID:', post.author._id, 'Current user ID:', user?.id,isOwnPost);
+  console.log(
+    "post author ID:",
+    post.author._id,
+    "Current user ID:",
+    user?.id,
+    isOwnPost
+  );
 
   return (
     <div className="_feed_inner_timeline_post_area _b_radious6 _padd_b24 _padd_t24 _mar_b16">
@@ -214,7 +381,7 @@ export default function Post({ post, onUpdate }: PostProps) {
           </div>
           <div className="_feed_inner_timeline_post_box_dropdown">
             <div className="_feed_timeline_post_dropdown">
-              <button 
+              <button
                 className="_feed_timeline_post_dropdown_link"
                 onClick={toggleDropdown}
                 type="button"
@@ -233,7 +400,15 @@ export default function Post({ post, onUpdate }: PostProps) {
               </button>
             </div>
 
-            <div className={`_feed_timeline_dropdown ${showDropdown ? 'show' : ''}`} style={{ opacity: showDropdown ? 1 : 0, visibility: showDropdown ? 'visible' : 'hidden' }}>
+            <div
+              className={`_feed_timeline_dropdown ${
+                showDropdown ? "show" : ""
+              }`}
+              style={{
+                opacity: showDropdown ? 1 : 0,
+                visibility: showDropdown ? "visible" : "hidden",
+              }}
+            >
               <ul className="_feed_timeline_dropdown_list">
                 <li className="_feed_timeline_dropdown_item">
                   <a href="#0" className="_feed_timeline_dropdown_link">
@@ -247,9 +422,9 @@ export default function Post({ post, onUpdate }: PostProps) {
                       >
                         <path
                           stroke="#1890FF"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="1.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.2"
                           d="M14.25 15.75L9 12l-5.25 3.75v-12a1.5 1.5 0 011.5-1.5h7.5a1.5 1.5 0 011.5 1.5v12z"
                         />
                       </svg>
@@ -303,13 +478,19 @@ export default function Post({ post, onUpdate }: PostProps) {
                 {isOwnPost && (
                   <>
                     <li className="_feed_timeline_dropdown_item">
-                      <button 
+                      <button
                         onClick={() => {
                           setIsEditing(true);
                           setShowDropdown(false);
                         }}
                         className="_feed_timeline_dropdown_link"
-                        style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          width: "100%",
+                          textAlign: "left",
+                          cursor: "pointer",
+                        }}
                       >
                         <span>
                           <svg
@@ -339,10 +520,16 @@ export default function Post({ post, onUpdate }: PostProps) {
                       </button>
                     </li>
                     <li className="_feed_timeline_dropdown_item">
-                      <button 
+                      <button
                         onClick={handleDeletePost}
                         className="_feed_timeline_dropdown_link"
-                        style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          width: "100%",
+                          textAlign: "left",
+                          cursor: "pointer",
+                        }}
                       >
                         <span>
                           <svg
@@ -377,15 +564,15 @@ export default function Post({ post, onUpdate }: PostProps) {
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               rows={4}
-              style={{ marginBottom: '10px' }}
+              style={{ marginBottom: "10px" }}
             />
-            <button 
+            <button
               className="btn btn-primary btn-sm _mar_r8"
               onClick={handleEditPost}
             >
               Save
             </button>
-            <button 
+            <button
               className="btn btn-secondary btn-sm"
               onClick={() => {
                 setIsEditing(false);
@@ -436,7 +623,11 @@ export default function Post({ post, onUpdate }: PostProps) {
             alt="Image"
             className="_react_img _rect_img_mbl_none"
           />
-          <p className="_feed_inner_timeline_total_reacts_para">9+</p>
+          <p className="_feed_inner_timeline_total_reacts_para">
+            {post.reactions?.length || post.likes.length > 0
+              ? `${post.reactions?.length || post.likes.length}`
+              : ""}
+          </p>
         </div>
         <div className="_feed_inner_timeline_total_reacts_txt">
           <p className="_feed_inner_timeline_total_reacts_para1">
@@ -448,51 +639,85 @@ export default function Post({ post, onUpdate }: PostProps) {
         </div>
       </div>
 
-      {showLikes && post.likes.length > 0 && (
-        <div className="_padd_r24 _padd_l24 _mar_b16">
-          <strong>Liked by:</strong>
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {post.likes.map((like) => (
-              <li key={like._id}>
-                {like.firstName} {like.lastName}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <div className="_feed_inner_timeline_reaction">
-        <button className="_feed_inner_timeline_reaction_emoji _feed_reaction _feed_reaction_active">
-          <span className="_feed_inner_timeline_reaction_link">
-            {" "}
-            <span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="19"
-                height="19"
-                fill="none"
-                viewBox="0 0 19 19"
-              >
-                <path
-                  fill="#FFCC4D"
-                  d="M9.5 19a9.5 9.5 0 100-19 9.5 9.5 0 000 19z"
-                ></path>
-                <path
-                  fill="#664500"
-                  d="M9.5 11.083c-1.912 0-3.181-.222-4.75-.527-.358-.07-1.056 0-1.056 1.055 0 2.111 2.425 4.75 5.806 4.75 3.38 0 5.805-2.639 5.805-4.75 0-1.055-.697-1.125-1.055-1.055-1.57.305-2.838.527-4.75.527z"
-                ></path>
-                <path
-                  fill="#fff"
-                  d="M4.75 11.611s1.583.528 4.75.528 4.75-.528 4.75-.528-1.056 2.111-4.75 2.111-4.75-2.11-4.75-2.11z"
-                ></path>
-                <path
-                  fill="#664500"
-                  d="M6.333 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847zM12.667 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847z"
-                ></path>
-              </svg>
-              Haha
+      <div
+        className="_feed_inner_timeline_reaction"
+        style={{ position: "relative" }}
+      >
+        <div
+          className={`_feed_inner_timeline_reaction_emoji _feed_reaction ${
+            userReaction || isLiked ? "_feed_reaction_active" : ""
+          }`}
+          style={{ position: "relative"}}
+          onMouseEnter={() => setShowReactionPicker(true)}
+          onMouseLeave={() => setShowReactionPicker(false)}
+        >
+          <div onClick={() => handleReaction(userReaction?.type || "like")}>
+            <span className="_feed_inner_timeline_reaction_link">
+              <span>
+                {userReaction ? (
+                  getReactionIcon(userReaction.type)
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="19"
+                    height="19"
+                    viewBox="0 0 24 24"
+                    fill={isLiked ? "#1877F2" : "currentColor"}
+                  >
+                    <path d="M7.493 18.75c-.425 0-.82-.236-.975-.632A7.48 7.48 0 0 1 6 15.375c0-1.75.599-3.358 1.602-4.634.151-.192.373-.309.6-.397.473-.183.89-.514 1.212-.924a9.042 9.042 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V3a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23h-.777ZM2.331 10.727a11.969 11.969 0 0 0-.831 4.398 12 12 0 0 0 .52 3.507c.26.85 1.084 1.368 1.973 1.368H4.9c.445 0 .72-.498.523-.898a8.963 8.963 0 0 1-.924-3.977c0-1.708.476-3.305 1.302-4.666.245-.403-.028-.959-.5-.959H4.25c-.832 0-1.612.453-1.918 1.227Z" />
+                  </svg>
+                )}
+                {userReaction ? getReactionText(userReaction.type) : "Like"}
+              </span>
             </span>
-          </span>
-        </button>
+          </div>
+
+          {/* Reaction Picker */}
+          {showReactionPicker && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: "100%",
+                left: "0",
+                backgroundColor: "white",
+                borderRadius: "25px",
+                padding: "8px 12px",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
+                display: "flex",
+                gap: "8px",
+                marginBottom: "8px",
+                zIndex: 1000,
+              }}
+            >
+              {["like", "love", "haha", "sad", "care", "angry"].map(
+                (reactionType) => (
+                  <button
+                    key={reactionType}
+                    onClick={() => handleReaction(reactionType as any)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: "4px",
+                      transform: "scale(1)",
+                      transition: "transform 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.3)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
+                    title={getReactionText(reactionType)}
+                  >
+                    {getReactionIcon(reactionType)}
+                  </button>
+                )
+              )}
+            </div>
+          )}
+        </div>
+
         <button className="_feed_inner_timeline_reaction_comment _feed_reaction">
           <span className="_feed_inner_timeline_reaction_link">
             {" "}

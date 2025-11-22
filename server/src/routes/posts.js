@@ -86,6 +86,10 @@ router.get('/', authMiddleware, async (req, res) => {
         path: 'likes',
         select: 'firstName lastName profilePicture'
       })
+      .populate({
+        path: 'reactions.user',
+        select: 'firstName lastName profilePicture'
+      })
       .sort({ createdAt: -1 });
 
     res.json({ posts });
@@ -102,6 +106,10 @@ router.get('/:id', authMiddleware, async (req, res) => {
       .populate('author', 'firstName lastName profilePicture')
       .populate({
         path: 'likes',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'reactions.user',
         select: 'firstName lastName profilePicture'
       });
 
@@ -124,34 +132,62 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // Like/Unlike post
 router.post('/:id/like', authMiddleware, async (req, res) => {
   try {
+    const { reactionType = 'like' } = req.body; // Default to 'like' if not specified
     const post = await Post.findById(req.params.id);
 
     if (!post) {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    const likeIndex = post.likes.indexOf(req.userId);
+    // Find existing reaction from this user
+    const existingReactionIndex = post.reactions.findIndex(
+      r => r.user.toString() === req.userId
+    );
 
-    if (likeIndex > -1) {
-      // Unlike
-      post.likes.splice(likeIndex, 1);
+    if (existingReactionIndex > -1) {
+      // If same reaction type, remove it (toggle off)
+      if (post.reactions[existingReactionIndex].type === reactionType) {
+        post.reactions.splice(existingReactionIndex, 1);
+        // Also remove from likes array for backward compatibility
+        const likeIndex = post.likes.indexOf(req.userId);
+        if (likeIndex > -1) {
+          post.likes.splice(likeIndex, 1);
+        }
+      } else {
+        // Update to new reaction type
+        post.reactions[existingReactionIndex].type = reactionType;
+      }
     } else {
-      // Like
-      post.likes.push(req.userId);
+      // Add new reaction
+      post.reactions.push({
+        user: req.userId,
+        type: reactionType
+      });
+      // Also add to likes array for backward compatibility
+      if (!post.likes.includes(req.userId)) {
+        post.likes.push(req.userId);
+      }
     }
 
     await post.save();
-    await post.populate({
-      path: 'likes',
-      select: 'firstName lastName profilePicture'
-    });
+    await post.populate([
+      {
+        path: 'likes',
+        select: 'firstName lastName profilePicture'
+      },
+      {
+        path: 'reactions.user',
+        select: 'firstName lastName profilePicture'
+      }
+    ]);
 
     res.json({ 
-      message: likeIndex > -1 ? 'Post unliked' : 'Post liked',
-      likes: post.likes
+      message: 'Reaction updated',
+      likes: post.likes,
+      reactions: post.reactions
     });
   } catch (error) {
-    console.error('Like post error:', error);
+    console.error('React to post error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
