@@ -1,16 +1,24 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const authMiddleware = require('../middleware/auth');
 const Post = require('../models/Post');
 const User = require('../models/User');
 
 const router = express.Router();
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+
 // Configure multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -36,6 +44,9 @@ const upload = multer({
 // Create post
 router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   try {
+    console.log('Request body:', req.body);
+    console.log('Request file:', req.file);
+    
     const { content, isPrivate } = req.body;
 
     if (!content) {
@@ -52,10 +63,12 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
     await post.save();
     await post.populate('author', 'firstName lastName profilePicture');
 
+    console.log('Post created successfully:', post._id);
     res.status(201).json({ message: 'Post created successfully', post });
   } catch (error) {
     console.error('Create post error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: error.message || 'Server error' });
   }
 });
 
