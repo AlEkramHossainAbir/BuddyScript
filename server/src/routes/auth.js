@@ -120,7 +120,15 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ user });
+    res.json({ 
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        profilePicture: user.profilePicture
+      }
+    });
   } catch (error) {
     res.status(401).json({ error: 'Invalid token' });
   }

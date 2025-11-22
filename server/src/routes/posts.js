@@ -156,6 +156,35 @@ router.post('/:id/like', authMiddleware, async (req, res) => {
   }
 });
 
+// Update post
+router.put('/:id', authMiddleware, async (req, res) => {
+  try {
+    const { content } = req.body;
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    if (post.author.toString() !== req.userId) {
+      return res.status(403).json({ error: 'Not authorized to update this post' });
+    }
+
+    if (!content) {
+      return res.status(400).json({ error: 'Content is required' });
+    }
+
+    post.content = content;
+    await post.save();
+    await post.populate('author', 'firstName lastName profilePicture');
+
+    res.json({ message: 'Post updated successfully', post });
+  } catch (error) {
+    console.error('Update post error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Delete post
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
