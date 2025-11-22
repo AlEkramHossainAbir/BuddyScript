@@ -32,7 +32,7 @@ export default function Header() {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
+        <div className="navbar-collapse" id="navbarSupportedContent">
           <div className="_header_form ms-auto">
             <form className="_header_form_grp">
               <svg

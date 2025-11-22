@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
