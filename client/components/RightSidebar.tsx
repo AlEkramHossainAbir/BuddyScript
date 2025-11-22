@@ -1,5 +1,16 @@
 'use client';
 
+const friends = [
+  { name: 'Steve Jobs', title: 'CEO of Apple', image: 'assets/images/people1.png', status: 'inactive', time: '5 minute ago' },
+  { name: 'Ryan Roslansky', title: 'CEO of Linkedin', image: 'assets/images/people2.png', status: 'active' },
+  { name: 'Dylan Field', title: 'CEO of Figma', image: 'assets/images/people3.png', status: 'active' },
+  { name: 'Steve Jobs', title: 'CEO of Apple', image: 'assets/images/people1.png', status: 'inactive', time: '5 minute ago' },
+  { name: 'Ryan Roslansky', title: 'CEO of Linkedin', image: 'assets/images/people2.png', status: 'active' },
+  { name: 'Dylan Field', title: 'CEO of Figma', image: 'assets/images/people3.png', status: 'active' },
+  { name: 'Dylan Field', title: 'CEO of Figma', image: 'assets/images/people3.png', status: 'active' },
+  { name: 'Steve Jobs', title: 'CEO of Apple', image: 'assets/images/people1.png', status: 'inactive', time: '5 minute ago' },
+];
+
 export default function RightSidebar() {
   return (
     <div className="_layout_right_sidebar_wrap">
@@ -46,164 +57,38 @@ export default function RightSidebar() {
 											<form className="_feed_right_inner_area_card_form">
 												<svg className="_feed_right_inner_area_card_form_svg" xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 17 17">
 													<circle cx="7" cy="7" r="6" stroke="#666"></circle>
-													<path stroke="#666" stroke-linecap="round" d="M16 16l-3-3"></path>
+													<path stroke="#666" strokeLinecap="round" d="M16 16l-3-3"></path>
 												</svg>
 												<input className="form-control me-2 _feed_right_inner_area_card_form_inpt" type="search" placeholder="input search text" aria-label="Search" />
 											</form>
 										</div>
 										<div className="_feed_bottom_fixed">
-											
-										<div className="_feed_right_inner_area_card_ppl _feed_right_inner_area_card_ppl_inactive ">
-											<div className="_feed_right_inner_area_card_ppl_box">
-												<div className="_feed_right_inner_area_card_ppl_image">
-													<a href="profile.html">
-														<img src="assets/images/people1.png" alt="" className="_box_ppl_img" />
-													</a>
+											{friends.map((friend, index) => (
+												<div key={index} className={`_feed_right_inner_area_card_ppl ${friend.status === 'inactive' ? '_feed_right_inner_area_card_ppl_inactive' : ''}`}>
+													<div className="_feed_right_inner_area_card_ppl_box">
+														<div className="_feed_right_inner_area_card_ppl_image">
+															<a href="profile.html">
+																<img src={friend.image} alt="" className="_box_ppl_img" />
+															</a>
+														</div>
+														<div className="_feed_right_inner_area_card_ppl_txt">
+															<a href="profile.html">
+																<h4 className="_feed_right_inner_area_card_ppl_title">{friend.name}</h4>
+															</a>
+															<p className="_feed_right_inner_area_card_ppl_para">{friend.title}</p>
+														</div>
+													</div>
+													<div className="_feed_right_inner_area_card_ppl_side">
+														{friend.status === 'active' ? (
+															<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 14 14">
+																<rect width="12" height="12" x="1" y="1" fill="#0ACF83" stroke="#fff" stroke-width="2" rx="6" />
+															</svg>
+														) : (
+															<span>{friend.time}</span>
+														)}
+													</div>
 												</div>
-												<div className="_feed_right_inner_area_card_ppl_txt">
-													<a href="profile.html">
-														<h4 className="_feed_right_inner_area_card_ppl_title">Steve Jobs</h4>
-													</a>
-													<p className="_feed_right_inner_area_card_ppl_para">CEO of Apple</p>
-												</div>
-											</div>
-											<div className="_feed_right_inner_area_card_ppl_side"> <span>5 minute ago</span>
-											</div>
-										</div>
-										<div className="_feed_right_inner_area_card_ppl">
-											<div className="_feed_right_inner_area_card_ppl_box">
-												<div className="_feed_right_inner_area_card_ppl_image">
-													<a href="profile.html">
-														<img src="assets/images/people2.png" alt="" className="_box_ppl_img" />
-													</a>
-												</div>
-												<div className="_feed_right_inner_area_card_ppl_txt">
-													<a href="profile.html">
-														<h4 className="_feed_right_inner_area_card_ppl_title">Ryan Roslansky</h4>
-													</a>
-													<p className="_feed_right_inner_area_card_ppl_para">CEO of Linkedin</p>
-												</div>
-											</div>
-											<div className="_feed_right_inner_area_card_ppl_side">
-												<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 14 14">
-													<rect width="12" height="12" x="1" y="1" fill="#0ACF83" stroke="#fff" stroke-width="2" rx="6" />
-												</svg>
-											</div>
-										</div>
-										<div className="_feed_right_inner_area_card_ppl">
-											<div className="_feed_right_inner_area_card_ppl_box">
-												<div className="_feed_right_inner_area_card_ppl_image">
-													<a href="profile.html">
-														<img src="assets/images/people3.png" alt="" className="_box_ppl_img" />
-													</a>
-												</div>
-												<div className="_feed_right_inner_area_card_ppl_txt">
-													<a href="profile.html">
-														<h4 className="_feed_right_inner_area_card_ppl_title">Dylan Field</h4>
-													</a>
-													<p className="_feed_right_inner_area_card_ppl_para">CEO of Figma</p>
-												</div>
-											</div>
-											<div className="_feed_right_inner_area_card_ppl_side">
-												<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 14 14">
-													<rect width="12" height="12" x="1" y="1" fill="#0ACF83" stroke="#fff" stroke-width="2" rx="6" />
-												</svg>
-											</div>
-										</div>
-										<div className="_feed_right_inner_area_card_ppl _feed_right_inner_area_card_ppl_inactive">
-											<div className="_feed_right_inner_area_card_ppl_box">
-												<div className="_feed_right_inner_area_card_ppl_image">
-													<a href="profile.html">
-														<img src="assets/images/people1.png" alt="" className="_box_ppl_img" />
-													</a>
-												</div>
-												<div className="_feed_right_inner_area_card_ppl_txt">
-													<a href="profile.html">
-														<h4 className="_feed_right_inner_area_card_ppl_title">Steve Jobs</h4>
-													</a>
-													<p className="_feed_right_inner_area_card_ppl_para">CEO of Apple</p>
-												</div>
-											</div>
-											<div className="_feed_right_inner_area_card_ppl_side"> <span>5 minute ago</span>
-											</div>
-										</div>
-										<div className="_feed_right_inner_area_card_ppl">
-											<div className="_feed_right_inner_area_card_ppl_box">
-												<div className="_feed_right_inner_area_card_ppl_image">
-													<a href="profile.html">
-														<img src="assets/images/people2.png" alt="" className="_box_ppl_img" />
-													</a>
-												</div>
-												<div className="_feed_right_inner_area_card_ppl_txt">
-													<a href="profile.html">
-														<h4 className="_feed_right_inner_area_card_ppl_title">Ryan Roslansky</h4>
-													</a>
-													<p className="_feed_right_inner_area_card_ppl_para">CEO of Linkedin</p>
-												</div>
-											</div>
-											<div className="_feed_right_inner_area_card_ppl_side">
-												<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 14 14">
-													<rect width="12" height="12" x="1" y="1" fill="#0ACF83" stroke="#fff" stroke-width="2" rx="6" />
-												</svg>
-											</div>
-										</div>
-										<div className="_feed_right_inner_area_card_ppl">
-											<div className="_feed_right_inner_area_card_ppl_box">
-												<div className="_feed_right_inner_area_card_ppl_image">
-													<a href="profile.html">
-														<img src="assets/images/people3.png" alt="" className="_box_ppl_img" />
-													</a>
-												</div>
-												<div className="_feed_right_inner_area_card_ppl_txt">
-													<a href="profile.html">
-														<h4 className="_feed_right_inner_area_card_ppl_title">Dylan Field</h4>
-													</a>
-													<p className="_feed_right_inner_area_card_ppl_para">CEO of Figma</p>
-												</div>
-											</div>
-											<div className="_feed_right_inner_area_card_ppl_side">
-												<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 14 14">
-													<rect width="12" height="12" x="1" y="1" fill="#0ACF83" stroke="#fff" stroke-width="2" rx="6" />
-												</svg>
-											</div>
-										</div>
-										<div className="_feed_right_inner_area_card_ppl">
-											<div className="_feed_right_inner_area_card_ppl_box">
-												<div className="_feed_right_inner_area_card_ppl_image">
-													<a href="profile.html">
-														<img src="assets/images/people3.png" alt="" className="_box_ppl_img" />
-													</a>
-												</div>
-												<div className="_feed_right_inner_area_card_ppl_txt">
-													<a href="profile.html">
-														<h4 className="_feed_right_inner_area_card_ppl_title">Dylan Field</h4>
-													</a>
-													<p className="_feed_right_inner_area_card_ppl_para">CEO of Figma</p>
-												</div>
-											</div>
-											<div className="_feed_right_inner_area_card_ppl_side">
-												<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 14 14">
-													<rect width="12" height="12" x="1" y="1" fill="#0ACF83" stroke="#fff" stroke-width="2" rx="6" />
-												</svg>
-											</div>
-										</div>
-										<div className="_feed_right_inner_area_card_ppl _feed_right_inner_area_card_ppl_inactive">
-											<div className="_feed_right_inner_area_card_ppl_box">
-												<div className="_feed_right_inner_area_card_ppl_image">
-													<a href="profile.html">
-														<img src="assets/images/people1.png" alt="" className="_box_ppl_img" />
-													</a>
-												</div>
-												<div className="_feed_right_inner_area_card_ppl_txt">
-													<a href="profile.html">
-														<h4 className="_feed_right_inner_area_card_ppl_title">Steve Jobs</h4>
-													</a>
-													<p className="_feed_right_inner_area_card_ppl_para">CEO of Apple</p>
-												</div>
-											</div>
-											<div className="_feed_right_inner_area_card_ppl_side"> <span>5 minute ago</span>
-											</div>
-										</div>
+											))}
 										</div>
 										</div>
 									</div>
