@@ -11,6 +11,7 @@ import MobileNavigation from '@/components/MobileNavigation';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 import LeftSidebar from '@/components/LeftSidebar';
 import RightSidebar from '@/components/RightSidebar';
+import PeopleStory from '@/components/PeopleStory';
 
 interface User {
   _id: string;
@@ -89,6 +90,7 @@ export default function FeedPage() {
               <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                 <div className="_layout_middle_wrap">
                   <div className="_layout_middle_inner">
+                    <PeopleStory />
                     <CreatePost onPostCreated={loadPosts} />
                     
                     {posts.length === 0 ? (
