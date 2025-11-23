@@ -230,12 +230,10 @@ export default function Post({ post, onUpdate }: PostProps) {
     if (diff < 1) return "Just now";
     if (diff < 60) return `${diff} minute${diff > 1 ? "s" : ""} ago`;
     if (diff < 1440)
-      return `${Math.floor(diff / 60)} hour${
-        Math.floor(diff / 60) > 1 ? "s" : ""
+      return `${Math.floor(diff / 60)} hour${Math.floor(diff / 60) > 1 ? "s" : ""
+        } ago`;
+    return `${Math.floor(diff / 1440)} day${Math.floor(diff / 1440) > 1 ? "s" : ""
       } ago`;
-    return `${Math.floor(diff / 1440)} day${
-      Math.floor(diff / 1440) > 1 ? "s" : ""
-    } ago`;
   };
 
   const handleEditPost = async () => {
@@ -327,9 +325,8 @@ export default function Post({ post, onUpdate }: PostProps) {
             </div>
 
             <div
-              className={`_feed_timeline_dropdown ${
-                showDropdown ? "show" : ""
-              }`}
+              className={`_feed_timeline_dropdown ${showDropdown ? "show" : ""
+                }`}
               style={{
                 opacity: showDropdown ? 1 : 0,
                 visibility: showDropdown ? "visible" : "hidden",
@@ -524,36 +521,46 @@ export default function Post({ post, onUpdate }: PostProps) {
 
       <div className="_feed_inner_timeline_total_reacts _padd_r24 _padd_l24 _mar_b26">
         <div className="_feed_inner_timeline_total_reacts_image">
-          <img
-            src="assets/images/react_img1.png"
-            alt="Image"
-            className="_react_img1"
-          />
-          <img
-            src="assets/images/react_img2.png"
-            alt="Image"
-            className="_react_img"
-          />
-          <img
-            src="assets/images/react_img3.png"
-            alt="Image"
-            className="_react_img _rect_img_mbl_none"
-          />
-          <img
-            src="assets/images/react_img4.png"
-            alt="Image"
-            className="_react_img _rect_img_mbl_none"
-          />
-          <img
-            src="assets/images/react_img5.png"
-            alt="Image"
-            className="_react_img _rect_img_mbl_none"
-          />
-          <p className="_feed_inner_timeline_total_reacts_para">
-            {post.reactions?.length || post.likes.length > 0
-              ? `${post.reactions?.length || post.likes.length}`
-              : ""}
-          </p>
+          {(() => {
+            // Get unique users who reacted or liked
+            const uniqueUsers = new Map<string, User>();
+
+            post.reactions?.forEach(r => uniqueUsers.set(r.user._id, r.user));
+            post.likes?.forEach(l => uniqueUsers.set(l._id, l));
+
+            const users = Array.from(uniqueUsers.values()).slice(0, 5);
+            const totalCount = uniqueUsers.size;
+
+            return (
+              <>
+                {users.map((u, index) => (
+                  <img
+                    key={u._id}
+                    src={u.profilePicture}
+                    alt={`${u.firstName} ${u.lastName}`}
+                    className={`_react_img ${index === 0 ? '_react_img1' : ''} ${index > 1 ? '_rect_img_mbl_none' : ''}`}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      border: '2px solid #fff',
+                      marginLeft: index === 0 ? '0' : '-8px',
+                      objectFit: 'cover',
+                      display: index > 4 ? 'none' : 'block'
+                    }}
+                  />
+                ))}
+                {
+                  totalCount > 5 && (
+                    <p className="_feed_inner_timeline_total_reacts_para">
+                      {totalCount - 5}+
+                    </p>
+                  )
+                }
+
+              </>
+            );
+          })()}
         </div>
         <div className="_feed_inner_timeline_total_reacts_txt">
           <p className="_feed_inner_timeline_total_reacts_para1">
@@ -570,9 +577,8 @@ export default function Post({ post, onUpdate }: PostProps) {
         style={{ position: "relative" }}
       >
         <div
-          className={`_feed_inner_timeline_reaction_emoji _feed_reaction ${
-            userReaction || isLiked ? "_feed_reaction_active" : ""
-          }`}
+          className={`_feed_inner_timeline_reaction_emoji _feed_reaction ${userReaction || isLiked ? "_feed_reaction_active" : ""
+            }`}
           style={{ position: "relative" }}
           onMouseEnter={handleMouseEnterReaction}
           onMouseLeave={handleMouseLeaveReaction}

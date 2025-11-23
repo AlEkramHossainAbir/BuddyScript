@@ -3,12 +3,14 @@
 import { useState } from "react";
 import api from "@/lib/api";
 import { toast } from "react-toastify";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CreatePostProps {
   onPostCreated: () => void;
 }
 
 export default function CreatePost({ onPostCreated }: CreatePostProps) {
+  const { user } = useAuth();
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [isPrivate, setIsPrivate] = useState(false);
@@ -69,19 +71,19 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
         <div className="_feed_inner_text_area_box">
           <div className="_feed_inner_text_area_box_image">
             <img
-              src="/assets/images/txt_img.png"
+              src={user?.profilePicture || "/assets/images/profile.png"}
               alt="Image"
               className="_txt_img"
             />
           </div>
           <div className="_feed_inner_text_area_box_form" style={{ position: 'relative' }}>
             <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
-              <select 
-                value={isPrivate ? 'private' : 'public'} 
+              <select
+                value={isPrivate ? 'private' : 'public'}
                 onChange={(e) => setIsPrivate(e.target.value === 'private')}
-                style={{ 
-                  padding: '6px 10px', 
-                  borderRadius: '6px', 
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '6px',
                   border: '1px solid #ccc',
                   fontSize: '14px',
                   cursor: 'pointer',
@@ -102,9 +104,9 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
               rows={3}
               style={{ paddingRight: '140px' }}
             />
-            
+
           </div>
-          
+
         </div>
 
         {imagePreview && (

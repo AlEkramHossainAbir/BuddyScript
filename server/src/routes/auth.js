@@ -29,7 +29,8 @@ router.post('/register', async (req, res) => {
       firstName,
       lastName,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      profilePicture: `/assets/images/people${Math.floor(Math.random() * 3) + 1}.png`
     });
 
     await user.save();
@@ -108,19 +109,19 @@ router.post('/login', async (req, res) => {
 router.get('/me', async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-change-in-production');
     const user = await User.findById(decoded.userId).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ 
+    res.json({
       user: {
         id: user._id,
         firstName: user.firstName,
