@@ -1725,8 +1725,8 @@
     color: var(--color7)6;
 }
 ._textarea::placeholder{
-    font-size: 12px;
-    color: var(--color7)6;
+    font-size: 16px;
+    color: var(--color7);
 }
 ._feed_inner_text_area_box_form>._textarea:focus~._feed_textarea_label {
     -webkit-transition: .2s all ease;

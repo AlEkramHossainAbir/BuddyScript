@@ -39,13 +39,14 @@ interface Comment {
 
 interface CommentsProps {
   postId: string;
+  onCommentsCountChange?: (count: number) => void;
 }
 
 export interface CommentsHandle {
   focusInput: () => void;
 }
 
-const Comments = forwardRef<CommentsHandle, CommentsProps>(({ postId }, ref) => {
+const Comments = forwardRef<CommentsHandle, CommentsProps>(({ postId, onCommentsCountChange }, ref) => {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentContent, setCommentContent] = useState("");
@@ -85,6 +86,12 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(({ postId }, ref) => 
   useEffect(() => {
     loadComments();
   }, [postId]);
+
+  useEffect(() => {
+    if (onCommentsCountChange) {
+      onCommentsCountChange(comments.length);
+    }
+  }, [comments, onCommentsCountChange]);
 
   const loadComments = async () => {
     try {

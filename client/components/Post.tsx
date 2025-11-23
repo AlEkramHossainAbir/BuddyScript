@@ -43,6 +43,7 @@ export default function Post({ post, onUpdate }: PostProps) {
   const [editContent, setEditContent] = useState(post.content);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [commentCount, setCommentCount] = useState(0);
 
   const handleFocusComment = () => {
     commentsRef.current?.focusInput();
@@ -568,12 +569,12 @@ export default function Post({ post, onUpdate }: PostProps) {
           })()}
         </div>
         <div className="_feed_inner_timeline_total_reacts_txt">
-          <p 
+          <p
             className="_feed_inner_timeline_total_reacts_para1"
             onClick={handleFocusComment}
             style={{ cursor: "pointer" }}
           >
-            <span>12</span> Comment
+            <span>{commentCount}</span> Comment
           </p>
           <p className="_feed_inner_timeline_total_reacts_para2">
             <span>122</span> Share
@@ -661,7 +662,7 @@ export default function Post({ post, onUpdate }: PostProps) {
           )}
         </div>
 
-        <button 
+        <button
           className="_feed_inner_timeline_reaction_comment _feed_reaction"
           onClick={handleFocusComment}
         >
@@ -715,7 +716,7 @@ export default function Post({ post, onUpdate }: PostProps) {
         </button>
       </div>
 
-      <Comments postId={post._id} ref={commentsRef} />
+      <Comments postId={post._id} ref={commentsRef} onCommentsCountChange={setCommentCount} />
     </div>
   );
 }
