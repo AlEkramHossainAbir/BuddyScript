@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Database connection
-ConnectDb("mongodb://127.0.0.1:27017/buddyScript");
+ConnectDb("mongodb+srv://buddy_script:BUDDYSCRIPT123@cluster0.gjcdlw5.mongodb.net/?appName=Cluster0");
 
 // Routes
 app.use('/api/auth', authRoutes);
