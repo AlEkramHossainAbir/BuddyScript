@@ -89,7 +89,10 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(({ postId, onComments
 
   useEffect(() => {
     if (onCommentsCountChange) {
-      onCommentsCountChange(comments.length);
+      const totalCount = comments.reduce((acc, comment) => {
+        return acc + 1 + (comment.replies ? comment.replies.length : 0);
+      }, 0);
+      onCommentsCountChange(totalCount);
     }
   }, [comments, onCommentsCountChange]);
 
