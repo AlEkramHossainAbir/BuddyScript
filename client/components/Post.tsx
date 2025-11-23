@@ -67,6 +67,7 @@ export default function Post({ post, onUpdate }: PostProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Find user's reaction if any
   const userReaction = post.reactions?.find(
@@ -245,6 +246,21 @@ export default function Post({ post, onUpdate }: PostProps) {
 
   const getReactionText = (type: string) => {
     return type.charAt(0).toUpperCase() + type.slice(1);
+  };
+
+  const handleMouseEnterReaction = () => {
+    if (hideTimeout) {
+      clearTimeout(hideTimeout);
+      setHideTimeout(null);
+    }
+    setShowReactionPicker(true);
+  };
+
+  const handleMouseLeaveReaction = () => {
+    const timeout = setTimeout(() => {
+      setShowReactionPicker(false);
+    }, 500); // 500ms delay before hiding
+    setHideTimeout(timeout);
   };
 
   const handleComment = async (e: React.FormEvent) => {
@@ -647,9 +663,9 @@ export default function Post({ post, onUpdate }: PostProps) {
           className={`_feed_inner_timeline_reaction_emoji _feed_reaction ${
             userReaction || isLiked ? "_feed_reaction_active" : ""
           }`}
-          style={{ position: "relative"}}
-          onMouseEnter={() => setShowReactionPicker(true)}
-          onMouseLeave={() => setShowReactionPicker(false)}
+          style={{ position: "relative" }}
+          onMouseEnter={handleMouseEnterReaction}
+          onMouseLeave={handleMouseLeaveReaction}
         >
           <div onClick={() => handleReaction(userReaction?.type || "like")}>
             <span className="_feed_inner_timeline_reaction_link">
@@ -688,6 +704,8 @@ export default function Post({ post, onUpdate }: PostProps) {
                 marginBottom: "8px",
                 zIndex: 1000,
               }}
+              onMouseEnter={handleMouseEnterReaction}
+              onMouseLeave={handleMouseLeaveReaction}
             >
               {["like", "love", "haha", "sad", "care", "angry"].map(
                 (reactionType) => (
