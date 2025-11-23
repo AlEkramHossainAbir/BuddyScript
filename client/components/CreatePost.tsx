@@ -16,6 +16,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
   const [isPrivate, setIsPrivate] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showVisibilityDropdown, setShowVisibilityDropdown] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -78,22 +79,120 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
           </div>
           <div className="_feed_inner_text_area_box_form" style={{ position: 'relative' }}>
             <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
-              <select
-                value={isPrivate ? 'private' : 'public'}
-                onChange={(e) => setIsPrivate(e.target.value === 'private')}
-                style={{
-                  padding: '6px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #ccc',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  backgroundColor: '#f0f2f5',
-                  fontWeight: '500'
-                }}
-              >
-                <option value="public">🌍 Public</option>
-                <option value="private">🔒 Private</option>
-              </select>
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowVisibilityDropdown(!showVisibilityDropdown)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    backgroundColor: '#E4E6EB',
+                    borderRadius: '6px',
+                    border: 'none',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    color: '#050505',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#D8DADF'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#E4E6EB'}
+                >
+                  {isPrivate ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="2" y1="12" x2="22" y2="12"></line>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                  )}
+                  <span>{isPrivate ? 'Private' : 'Public'}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+
+                {showVisibilityDropdown && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: '0',
+                    marginTop: '8px',
+                    backgroundColor: '#fff',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+                    padding: '8px',
+                    width: '140px',
+                    zIndex: 100
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsPrivate(false);
+                        setShowVisibilityDropdown(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '8px',
+                        border: 'none',
+                        background: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        color: '#050505',
+                        textAlign: 'left'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0F2F5'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                      </svg>
+                      Public
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsPrivate(true);
+                        setShowVisibilityDropdown(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '8px',
+                        border: 'none',
+                        background: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        color: '#050505',
+                        textAlign: 'left'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0F2F5'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                      Private
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             <textarea
               className="form-control _textarea"
