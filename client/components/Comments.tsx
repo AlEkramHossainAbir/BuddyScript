@@ -76,6 +76,9 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(({ postId, onComments
   const replyImageInputRefs = useRef<{
     [key: string]: HTMLInputElement | null;
   }>({});
+  const replyInputRefs = useRef<{
+    [key: string]: HTMLTextAreaElement | null;
+  }>({});
 
   useImperativeHandle(ref, () => ({
     focusInput: () => {
@@ -235,7 +238,13 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(({ postId, onComments
   };
 
   const toggleReplies = (commentId: string) => {
-    setShowReplies({ ...showReplies, [commentId]: !showReplies[commentId] });
+    const isOpening = !showReplies[commentId];
+    setShowReplies({ ...showReplies, [commentId]: isOpening });
+    if (isOpening) {
+      setTimeout(() => {
+        replyInputRefs.current[commentId]?.focus();
+      }, 0);
+    }
   };
 
   const getReactionIcon = (type: string, size: number = 16) => {
@@ -739,6 +748,9 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(({ postId, onComments
                           </div>
                           <div className="_feed_inner_comment_box_content_txt">
                             <textarea
+                              ref={(el) => {
+                                replyInputRefs.current[comment._id] = el;
+                              }}
                               className="form-control _comment_textarea"
                               placeholder="Write a reply"
                               value={replyContent[comment._id] || ""}
