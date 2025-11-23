@@ -1,5 +1,18 @@
 const mongoose = require('mongoose');
 
+const reactionSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  type: {
+    type: String,
+    enum: ['like', 'love', 'haha', 'sad', 'care', 'angry'],
+    required: true
+  }
+}, { _id: true });
+
 const commentSchema = new mongoose.Schema({
   post: {
     type: mongoose.Schema.Types.ObjectId,
@@ -13,13 +26,16 @@ const commentSchema = new mongoose.Schema({
   },
   content: {
     type: String,
-    required: true,
     trim: true
+  },
+  image: {
+    type: String
   },
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
+  reactions: [reactionSchema],
   replies: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Reply'
