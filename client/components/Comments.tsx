@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import api from "@/lib/api";
 import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,7 +41,11 @@ interface CommentsProps {
   postId: string;
 }
 
-export default function Comments({ postId }: CommentsProps) {
+export interface CommentsHandle {
+  focusInput: () => void;
+}
+
+const Comments = forwardRef<CommentsHandle, CommentsProps>(({ postId }, ref) => {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentContent, setCommentContent] = useState("");
@@ -67,9 +71,16 @@ export default function Comments({ postId }: CommentsProps) {
     [key: string]: NodeJS.Timeout | null;
   }>({});
   const commentImageInputRef = useRef<HTMLInputElement>(null);
+  const commentInputRef = useRef<HTMLTextAreaElement>(null);
   const replyImageInputRefs = useRef<{
     [key: string]: HTMLInputElement | null;
   }>({});
+
+  useImperativeHandle(ref, () => ({
+    focusInput: () => {
+      commentInputRef.current?.focus();
+    },
+  }));
 
   useEffect(() => {
     loadComments();
@@ -422,11 +433,12 @@ export default function Comments({ postId }: CommentsProps) {
             </div>
             <div className="_feed_inner_comment_box_content_txt">
               <textarea
+                ref={commentInputRef}
                 className="form-control _comment_textarea"
                 placeholder="Write a comment"
                 value={commentContent}
                 onChange={(e) => setCommentContent(e.target.value)}
-                onKeyPress={(e) => {
+                onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     handleCommentSubmit(e);
                   }
@@ -649,7 +661,7 @@ export default function Comments({ postId }: CommentsProps) {
                                     onClick={() =>
                                       handleReaction(
                                         comment._id,
-                                        reactionType
+                                        reactionType as "like" | "love" | "haha" | "sad" | "care" | "angry"
                                       )
                                     }
                                     style={{
@@ -726,7 +738,7 @@ export default function Comments({ postId }: CommentsProps) {
                                   [comment._id]: e.target.value,
                                 })
                               }
-                              onKeyPress={(e) => {
+                              onKeyDown={(e) => {
                                 if (e.key === "Enter" && !e.shiftKey) {
                                   handleReplySubmit(comment._id, e);
                                 }
@@ -900,4 +912,6 @@ export default function Comments({ postId }: CommentsProps) {
       )}
     </div>
   );
-}
+});
+
+export default Comments;

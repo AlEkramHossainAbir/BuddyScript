@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import api from "@/lib/api";
 import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/AuthContext";
-import Comments from "./Comments";
+import Comments, { CommentsHandle } from "./Comments";
 
 interface User {
   _id: string;
@@ -37,11 +37,16 @@ interface PostProps {
 
 export default function Post({ post, onUpdate }: PostProps) {
   const { user } = useAuth();
+  const commentsRef = useRef<CommentsHandle>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const handleFocusComment = () => {
+    commentsRef.current?.focusInput();
+  };
 
   // Find user's reaction if any
   const userReaction = post.reactions?.find(
@@ -563,7 +568,11 @@ export default function Post({ post, onUpdate }: PostProps) {
           })()}
         </div>
         <div className="_feed_inner_timeline_total_reacts_txt">
-          <p className="_feed_inner_timeline_total_reacts_para1">
+          <p 
+            className="_feed_inner_timeline_total_reacts_para1"
+            onClick={handleFocusComment}
+            style={{ cursor: "pointer" }}
+          >
             <span>12</span> Comment
           </p>
           <p className="_feed_inner_timeline_total_reacts_para2">
@@ -652,7 +661,10 @@ export default function Post({ post, onUpdate }: PostProps) {
           )}
         </div>
 
-        <button className="_feed_inner_timeline_reaction_comment _feed_reaction">
+        <button 
+          className="_feed_inner_timeline_reaction_comment _feed_reaction"
+          onClick={handleFocusComment}
+        >
           <span className="_feed_inner_timeline_reaction_link">
             {" "}
             <span>
@@ -703,7 +715,7 @@ export default function Post({ post, onUpdate }: PostProps) {
         </button>
       </div>
 
-      <Comments postId={post._id} />
+      <Comments postId={post._id} ref={commentsRef} />
     </div>
   );
 }
