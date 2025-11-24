@@ -22,7 +22,7 @@ interface User {
 
 interface Reaction {
   user: User;
-  type: "like" | "love" | "haha" | "sad" | "care" | "angry";
+  type: "like" | "love" | "haha" | "wow" | "sad" | "angry";
   _id?: string;
 }
 

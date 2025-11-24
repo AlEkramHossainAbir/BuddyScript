@@ -467,7 +467,7 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
                         {comment.image && (
                           <div style={{ marginTop: "8px" }}>
                             <img
-                              src={`http://localhost:8000${comment.image}`}
+                              src={comment.image.startsWith('http') ? comment.image : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}${comment.image}`}
                               alt=""
                               style={{ maxWidth: "300px", borderRadius: "8px" }}
                             />

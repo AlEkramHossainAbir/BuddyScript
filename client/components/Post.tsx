@@ -370,7 +370,7 @@ export default function Post({ post, onUpdate }: PostProps) {
         {post.image && (
           <div className="_feed_inner_timeline_image">
             <img
-              src={`http://localhost:8000${post.image}`}
+              src={post.image.startsWith('http') ? post.image : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}${post.image}`}
               alt=""
               className="_time_img"
             />
