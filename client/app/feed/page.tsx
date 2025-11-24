@@ -20,12 +20,19 @@ interface User {
   profilePicture: string;
 }
 
+interface Reaction {
+  user: User;
+  type: "like" | "love" | "haha" | "sad" | "care" | "angry";
+  _id?: string;
+}
+
 interface PostType {
   _id: string;
   content: string;
   image?: string;
   author: User;
   likes: User[];
+  reactions: Reaction[];
   isPrivate: boolean;
   createdAt: string;
 }
