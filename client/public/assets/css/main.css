@@ -5994,6 +5994,7 @@
     text-decoration: underline;
 }
 ._comment_reply_list li ._time_link {
+    text-wrap: nowrap;
     color:var(--color7);
 }
 ._previous_comment {

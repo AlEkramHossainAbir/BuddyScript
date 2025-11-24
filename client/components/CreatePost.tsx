@@ -209,21 +209,48 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
         </div>
 
         {imagePreview && (
-          <div className="_mar_t16 _mar_b16">
+          <div className="_mar_t16 _mar_b16" style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
             <img
               src={imagePreview}
               alt="Preview"
-              style={{ maxWidth: "100%", maxHeight: "300px" }}
+              style={{ 
+                maxWidth: "100%", 
+                maxHeight: "400px", 
+                borderRadius: '8px',
+                display: 'block'
+              }}
             />
             <button
               type="button"
-              className="btn btn-sm btn-danger _mar_t8"
               onClick={() => {
                 setImage(null);
                 setImagePreview(null);
               }}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background-color 0.2s',
+                padding: '0'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.6)'}
+              title="Remove image"
             >
-              Remove Image
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
             </button>
           </div>
         )}

@@ -129,6 +129,8 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
         };
         reader.readAsDataURL(file);
       }
+      // Reset the input value to allow selecting the same file again
+      e.target.value = '';
     };
 
     const handleReplyImageChange = (
@@ -147,6 +149,8 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
         };
         reader.readAsDataURL(file);
       }
+      // Reset the input value to allow selecting the same file again
+      e.target.value = '';
     };
 
     const handleCommentSubmit = async (
