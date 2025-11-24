@@ -1,11 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { OAuth2Client } = require('google-auth-library');
+const axios = require('axios');
 const User = require('../models/User');
 
 const router = express.Router();
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Google OAuth Login/Register
 router.post('/google', async (req, res) => {
@@ -13,17 +12,17 @@ router.post('/google', async (req, res) => {
     const { idToken } = req.body;
 
     if (!idToken) {
-      return res.status(400).json({ error: 'ID token is required' });
+      return res.status(400).json({ error: 'Access token is required' });
     }
 
-    // Verify Google ID token
-    const ticket = await googleClient.verifyIdToken({
-      idToken,
-      audience: process.env.GOOGLE_CLIENT_ID
+    // Get user info from Google using access token
+    const response = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: {
+        Authorization: `Bearer ${idToken}`
+      }
     });
 
-    const payload = ticket.getPayload();
-    const { sub: googleId, email, given_name, family_name, picture } = payload;
+    const { sub: googleId, email, given_name, family_name, picture } = response.data;
 
     // Check if user exists
     let user = await User.findOne({ $or: [{ googleId }, { email }] });
