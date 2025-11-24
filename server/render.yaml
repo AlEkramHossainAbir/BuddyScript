@@ -1,12 +1,10 @@
 # Render Configuration for Node.js Backend
 
-# This file is optional - you can also configure via Render Dashboard
-
 # Build Command
-buildCommand: npm install
+build: npm install
 
 # Start Command
-startCommand: npm start
+start: npm start
 
 # Environment
 env: node

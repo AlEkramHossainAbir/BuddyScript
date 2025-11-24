@@ -815,9 +815,9 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(({ postId, onComments
                         <div className="_feed_inner_comment_box_icon">
                           <input
                             type="file"
-                            ref={(el) =>
-                              (replyImageInputRefs.current[comment._id] = el)
-                            }
+                            ref={(el) => {
+                              replyImageInputRefs.current[comment._id] = el;
+                            }}
                             style={{ display: "none" }}
                             accept="image/*"
                             onChange={(e) =>
