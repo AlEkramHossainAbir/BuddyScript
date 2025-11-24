@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -54,6 +55,30 @@ export default function LoginPage() {
                 </div>
                 <p className="_social_login_content_para _mar_b8">Welcome back</p>
                 <h4 className="_social_login_content_title _titl4 _mar_b50">Login to your account</h4>
+                
+                {/* Google Sign In Button */}
+                <GoogleSignInButton />
+                
+                <div className="_social_login_or _mar_b14" style={{ textAlign: 'center', position: 'relative' }}>
+                  <span style={{ 
+                    background: 'white', 
+                    padding: '0 10px', 
+                    position: 'relative', 
+                    zIndex: 1,
+                    color: '#666'
+                  }}>
+                    OR
+                  </span>
+                  <div style={{ 
+                    position: 'absolute', 
+                    top: '50%', 
+                    left: 0, 
+                    right: 0, 
+                    height: '1px', 
+                    background: '#dadce0',
+                    zIndex: 0
+                  }}></div>
+                </div>
                 
                 <form className="_social_login_form" onSubmit={handleSubmit}>
                   <div className="row">
