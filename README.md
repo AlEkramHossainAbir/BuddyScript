@@ -215,7 +215,6 @@ BuddyScript/
 ### 4. **Image Storage**
 **Current**: Local file system (`/uploads` directory)
 **Consideration**: For production deployment on ephemeral platforms (Render, Railway, Heroku):
-- Implemented Cloudinary integration path
 - Env variable detection for automatic cloud upload
 - **Note**: Images will be lost on server restart if using local storage in production
 
@@ -298,10 +297,7 @@ GOOGLE_CALLBACK_URL=http://localhost:8000/auth/google/callback
 # Session Secret
 SESSION_SECRET=your-session-secret-key
 
-# Cloudinary (optional, for cloud image storage)
-# CLOUDINARY_CLOUD_NAME=your-cloud-name
-# CLOUDINARY_API_KEY=your-api-key
-# CLOUDINARY_API_SECRET=your-api-secret
+
 ```
 
 ### 3. Client Setup
@@ -429,15 +425,11 @@ curl -X POST https://your-backend-url.com/api/auth/register \
 ```
 
 **Common Hosted Environment Issues**:
-1. **Images disappear after server restart**: 
-   - Cause: Ephemeral file system
-   - Solution: Configure Cloudinary environment variables
-   
-2. **CORS errors**: 
+1. **CORS errors**: 
    - Check backend CORS configuration includes frontend URL
    - Verify `NEXT_PUBLIC_API_URL` is correct
 
-3. **Google OAuth fails**:
+2. **Google OAuth fails**:
    - Add production URL to Google Console authorized origins
    - Update `GOOGLE_CALLBACK_URL` to production backend URL
 
@@ -571,9 +563,6 @@ Response: { "comment": {...} }
 
 🔧 **Hydration Errors**: Nested anchor tags in comments
 - **Solution**: Removed wrapper anchor, kept only name link
-
-🔧 **Image Persistence**: Images lost on hosted platform restarts
-- **Solution**: Prepared Cloudinary integration with environment-based detection
 
 ### Future Enhancements
 🚀 Real-time updates with WebSockets  
