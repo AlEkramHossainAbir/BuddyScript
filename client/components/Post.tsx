@@ -5,6 +5,7 @@ import api from "@/lib/api";
 import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/AuthContext";
 import Comments, { CommentsHandle } from "./Comments";
+import { ReactionBarSelector } from "@charkour/react-reactions";
 
 interface User {
   _id: string;
@@ -15,7 +16,7 @@ interface User {
 
 interface Reaction {
   user: User;
-  type: "like" | "love" | "haha" | "sad" | "care" | "angry";
+  type: "like" | "love" | "haha" | "wow" | "sad" | "angry";
   _id?: string;
 }
 
@@ -56,156 +57,14 @@ export default function Post({ post, onUpdate }: PostProps) {
   const isLiked = post.likes.some((like) => like._id === user?.id);
 
   const handleReaction = async (
-    reactionType: "like" | "love" | "haha" | "sad" | "care" | "angry"
+    reactionType: "like" | "love" | "haha" | "wow" | "sad" | "angry"
   ) => {
     try {
       await api.post(`/posts/${post._id}/like`, { reactionType });
       setShowReactionPicker(false);
       onUpdate();
-    } catch (error) {
+    } catch {
       toast.error("Failed to react to post");
-    }
-  };
-
-  const getReactionIcon = (type: string) => {
-    switch (type) {
-      case "like":
-        return (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="19"
-            height="19"
-            viewBox="0 0 24 24"
-            fill="#1877F2"
-          >
-            <path d="M7.493 18.75c-.425 0-.82-.236-.975-.632A7.48 7.48 0 0 1 6 15.375c0-1.75.599-3.358 1.602-4.634.151-.192.373-.309.6-.397.473-.183.89-.514 1.212-.924a9.042 9.042 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V3a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23h-.777ZM2.331 10.727a11.969 11.969 0 0 0-.831 4.398 12 12 0 0 0 .52 3.507c.26.85 1.084 1.368 1.973 1.368H4.9c.445 0 .72-.498.523-.898a8.963 8.963 0 0 1-.924-3.977c0-1.708.476-3.305 1.302-4.666.245-.403-.028-.959-.5-.959H4.25c-.832 0-1.612.453-1.918 1.227Z" />
-          </svg>
-        );
-      case "love":
-        return (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="19"
-            height="19"
-            viewBox="0 0 19 19"
-            fill="none"
-          >
-            <path
-              fill="#F33E58"
-              d="M9.5 17.5c-.2 0-.4-.1-.5-.2-1.6-1.4-3-2.6-4.1-3.7-1.5-1.4-2.6-2.6-3.3-3.5C.6 8.9.2 7.8.2 6.6c0-1.2.4-2.2 1.2-3 .8-.8 1.8-1.2 3-1.2 1 0 1.9.3 2.6.9.4.3.7.7 1 1.1.3-.4.6-.8 1-1.1.7-.6 1.6-.9 2.6-.9 1.2 0 2.2.4 3 1.2.8.8 1.2 1.8 1.2 3 0 1.2-.4 2.3-1.3 3.5-.7.9-1.8 2.1-3.3 3.5-1.1 1.1-2.5 2.3-4.1 3.7-.1.1-.3.2-.5.2z"
-            />
-          </svg>
-        );
-      case "haha":
-        return (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="19"
-            height="19"
-            fill="none"
-            viewBox="0 0 19 19"
-          >
-            <path
-              fill="#FFCC4D"
-              d="M9.5 19a9.5 9.5 0 100-19 9.5 9.5 0 000 19z"
-            />
-            <path
-              fill="#664500"
-              d="M9.5 11.083c-1.912 0-3.181-.222-4.75-.527-.358-.07-1.056 0-1.056 1.055 0 2.111 2.425 4.75 5.806 4.75 3.38 0 5.805-2.639 5.805-4.75 0-1.055-.697-1.125-1.055-1.055-1.57.305-2.838.527-4.75.527z"
-            />
-            <path
-              fill="#fff"
-              d="M4.75 11.611s1.583.528 4.75.528 4.75-.528 4.75-.528-1.056 2.111-4.75 2.111-4.75-2.11-4.75-2.11z"
-            />
-            <path
-              fill="#664500"
-              d="M6.333 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847zM12.667 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847z"
-            />
-          </svg>
-        );
-      case "sad":
-        return (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="19"
-            height="19"
-            fill="none"
-            viewBox="0 0 19 19"
-          >
-            <path
-              fill="#FFCC4D"
-              d="M9.5 19a9.5 9.5 0 100-19 9.5 9.5 0 000 19z"
-            />
-            <path
-              fill="#5DADEC"
-              d="M6.527 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847zM12.473 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847z"
-            />
-            <path
-              fill="#664500"
-              d="M4.75 13.417c0-.359.698-.359 1.056-.289 1.569.305 2.838.527 4.75.527s3.181-.222 4.75-.527c.358-.07 1.056-.07 1.056.289 0 1.055-2.425 2.638-5.806 2.638-3.38 0-5.806-1.583-5.806-2.638z"
-            />
-            <path
-              fill="#5DADEC"
-              d="M6.916 12.4a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM14.084 12.4a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-            />
-          </svg>
-        );
-      case "care":
-        return (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="19"
-            height="19"
-            fill="none"
-            viewBox="0 0 19 19"
-          >
-            <path
-              fill="#FFCC4D"
-              d="M9.5 19a9.5 9.5 0 100-19 9.5 9.5 0 000 19z"
-            />
-            <path
-              fill="#F4900C"
-              d="M9.5 3.167c-3.5 0-6.333 2.833-6.333 6.333h1.583c0-2.617 2.133-4.75 4.75-4.75 2.617 0 4.75 2.133 4.75 4.75h1.583c0-3.5-2.833-6.333-6.333-6.333z"
-            />
-            <path
-              fill="#F33E58"
-              d="M12.667 10.292c0 1.75-1.417 3.166-3.167 3.166-1.75 0-3.167-1.416-3.167-3.166h6.334z"
-            />
-            <path
-              fill="#664500"
-              d="M7.125 8.208c.438 0 .792-.354.792-.791a.792.792 0 00-1.584 0c0 .437.355.791.792.791zM11.875 8.208c.438 0 .792-.354.792-.791a.792.792 0 00-1.584 0c0 .437.355.791.792.791z"
-            />
-          </svg>
-        );
-      case "angry":
-        return (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="19"
-            height="19"
-            fill="none"
-            viewBox="0 0 19 19"
-          >
-            <path
-              fill="#F4900C"
-              d="M9.5 19a9.5 9.5 0 100-19 9.5 9.5 0 000 19z"
-            />
-            <path
-              fill="#664500"
-              d="M6.333 9.5c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847S5.604 9.5 6.333 9.5zM12.667 9.5c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847z"
-            />
-            <path
-              fill="#664500"
-              d="M5.542 6.333L7.917 7.125 5.542 5.542zM13.458 6.333L11.083 7.125l2.375-1.583z"
-            />
-            <path
-              fill="#664500"
-              d="M9.5 14.25c1.912 0 3.181-.222 4.75-.527.358-.07 1.056 0 1.056 1.055 0 2.111-2.425 4.75-5.806 4.75-3.38 0-5.806-2.639-5.806-4.75 0-1.055.698-1.125 1.056-1.055 1.57.305 2.838.527 4.75.527z"
-            />
-          </svg>
-        );
-      default:
-        return null;
     }
   };
 
@@ -254,8 +113,9 @@ export default function Post({ post, onUpdate }: PostProps) {
       setIsEditing(false);
       setShowDropdown(false);
       onUpdate();
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to update post");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      toast.error(err.response?.data?.error || "Failed to update post");
     }
   };
 
@@ -268,8 +128,9 @@ export default function Post({ post, onUpdate }: PostProps) {
       await api.delete(`/posts/${post._id}`);
       toast.success("Post deleted successfully!");
       onUpdate();
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to delete post");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      toast.error(err.response?.data?.error || "Failed to delete post");
     }
   };
 
@@ -278,14 +139,6 @@ export default function Post({ post, onUpdate }: PostProps) {
   };
 
   const isOwnPost = user?.id === post.author._id;
-
-  console.log(
-    "post author ID:",
-    post.author._id,
-    "Current user ID:",
-    user?.id,
-    isOwnPost
-  );
 
   return (
     <div className="_feed_inner_timeline_post_area _b_radious6 _padd_b24 _padd_t24 _mar_b16">
@@ -593,11 +446,20 @@ export default function Post({ post, onUpdate }: PostProps) {
           onMouseEnter={handleMouseEnterReaction}
           onMouseLeave={handleMouseLeaveReaction}
         >
-          <div onClick={() => handleReaction(userReaction?.type || "like")}>
+          <div onClick={() => {
+            handleReaction(userReaction?.type as "like" | "love" | "haha" | "wow" | "sad" | "angry");
+          }}>
             <span className="_feed_inner_timeline_reaction_link">
-              <span>
+              <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                 {userReaction ? (
-                  getReactionIcon(userReaction.type)
+                  <span style={{ fontSize: "16px" }}>
+                    {userReaction.type === "like" && "👍"}
+                    {userReaction.type === "love" && "❤️"}
+                    {userReaction.type === "haha" && "😂"}
+                    {userReaction.type === "wow" && "😮"}
+                    {userReaction.type === "sad" && "😢"}
+                    {userReaction.type === "angry" && "😠"}
+                  </span>
                 ) : (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -609,7 +471,7 @@ export default function Post({ post, onUpdate }: PostProps) {
                     <path d="M7.493 18.75c-.425 0-.82-.236-.975-.632A7.48 7.48 0 0 1 6 15.375c0-1.75.599-3.358 1.602-4.634.151-.192.373-.309.6-.397.473-.183.89-.514 1.212-.924a9.042 9.042 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V3a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23h-.777ZM2.331 10.727a11.969 11.969 0 0 0-.831 4.398 12 12 0 0 0 .52 3.507c.26.85 1.084 1.368 1.973 1.368H4.9c.445 0 .72-.498.523-.898a8.963 8.963 0 0 1-.924-3.977c0-1.708.476-3.305 1.302-4.666.245-.403-.028-.959-.5-.959H4.25c-.832 0-1.612.453-1.918 1.227Z" />
                   </svg>
                 )}
-                {userReaction ? getReactionText(userReaction.type) : "Like"}
+                <span>{userReaction ? getReactionText(userReaction.type) : "Like"}</span>
               </span>
             </span>
           </div>
@@ -621,43 +483,25 @@ export default function Post({ post, onUpdate }: PostProps) {
                 position: "absolute",
                 bottom: "100%",
                 left: "0",
-                backgroundColor: "white",
-                borderRadius: "25px",
-                padding: "8px 12px",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
-                display: "flex",
-                gap: "8px",
                 marginBottom: "8px",
                 zIndex: 1000,
               }}
               onMouseEnter={handleMouseEnterReaction}
               onMouseLeave={handleMouseLeaveReaction}
             >
-              {["like", "love", "haha", "sad", "care", "angry"].map(
-                (reactionType) => (
-                  <button
-                    key={reactionType}
-                    onClick={() => handleReaction(reactionType as any)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: "4px",
-                      transform: "scale(1)",
-                      transition: "transform 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "scale(1.3)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "scale(1)";
-                    }}
-                    title={getReactionText(reactionType)}
-                  >
-                    {getReactionIcon(reactionType)}
-                  </button>
-                )
-              )}
+              <div style={{ fontSize: "20px", transform: "scale(0.85)" }}>
+                <ReactionBarSelector
+                  reactions={[
+                    { label: "like", node: <div style={{ fontSize: "24px" }}>👍</div>, key: "like" },
+                    { label: "love", node: <div style={{ fontSize: "24px" }}>❤️</div>, key: "love" },
+                    { label: "haha", node: <div style={{ fontSize: "24px" }}>😂</div>, key: "haha" },
+                    { label: "wow", node: <div style={{ fontSize: "24px" }}>😮</div>, key: "wow" },
+                    { label: "sad", node: <div style={{ fontSize: "24px" }}>😢</div>, key: "sad" },
+                    { label: "angry", node: <div style={{ fontSize: "24px" }}>😠</div>, key: "angry" },
+                  ]}
+                  onSelect={(key) => handleReaction(key as "like" | "love" | "haha" | "wow" | "sad" | "angry")}
+                />
+              </div>
             </div>
           )}
         </div>

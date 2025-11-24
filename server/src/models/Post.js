@@ -30,7 +30,7 @@ const postSchema = new mongoose.Schema({
     },
     type: {
       type: String,
-      enum: ['like', 'love', 'haha', 'sad', 'care', 'angry'],
+      enum: ['like', 'love', 'haha', 'wow', 'sad', 'angry'],
       default: 'like'
     }
   }]
