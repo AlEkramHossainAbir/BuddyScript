@@ -74,27 +74,11 @@ export default function RegisterPage() {
                 <h4 className="_social_registration_content_title _titl4 _mar_b50">Registration</h4>
                 
                 {/* Google Sign In Button */}
-                <GoogleSignInButton />
-                
-                <div className="_social_registration_or _mar_b14" style={{ textAlign: 'center', position: 'relative' }}>
-                  <span style={{ 
-                    background: 'white', 
-                    padding: '0 10px', 
-                    position: 'relative', 
-                    zIndex: 1,
-                    color: '#666'
-                  }}>
-                    OR
-                  </span>
-                  <div style={{ 
-                    position: 'absolute', 
-                    top: '50%', 
-                    left: 0, 
-                    right: 0, 
-                    height: '1px', 
-                    background: '#dadce0',
-                    zIndex: 0
-                  }}></div>
+                <GoogleSignInButton btnText='Register with google' />
+
+                <div className="_social_login_content_bottom_txt _mar_b40">
+                  {" "}
+                  <span>Or</span>
                 </div>
                 
                 <form className="_social_registration_form" onSubmit={handleSubmit}>
@@ -165,7 +149,7 @@ export default function RegisterPage() {
                       <div className="form-check _social_registration_form_check">
                         <input
                           className="form-check-input _social_registration_form_check_input"
-                          type="checkbox"
+                          type="radio"
                           id="agreeTerms"
                           checked={agreeTerms}
                           onChange={(e) => setAgreeTerms(e.target.checked)}

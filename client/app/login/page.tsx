@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import GoogleSignInButton from '@/components/GoogleSignInButton';
-import Link from 'next/link';
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
+import Link from "next/link";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -28,15 +28,27 @@ export default function LoginPage() {
     <section className="_social_login_wrapper _layout_main_wrapper">
       <div className="_shape_one">
         <img src="/assets/images/shape1.svg" alt="" className="_shape_img" />
-        <img src="/assets/images/dark_shape.svg" alt="" className="_dark_shape" />
+        <img
+          src="/assets/images/dark_shape.svg"
+          alt=""
+          className="_dark_shape"
+        />
       </div>
       <div className="_shape_two">
         <img src="/assets/images/shape2.svg" alt="" className="_shape_img" />
-        <img src="/assets/images/dark_shape1.svg" alt="" className="_dark_shape _dark_shape_opacity" />
+        <img
+          src="/assets/images/dark_shape1.svg"
+          alt=""
+          className="_dark_shape _dark_shape_opacity"
+        />
       </div>
       <div className="_shape_three">
         <img src="/assets/images/shape3.svg" alt="" className="_shape_img" />
-        <img src="/assets/images/dark_shape2.svg" alt="" className="_dark_shape _dark_shape_opacity" />
+        <img
+          src="/assets/images/dark_shape2.svg"
+          alt=""
+          className="_dark_shape _dark_shape_opacity"
+        />
       </div>
       <div className="_social_login_wrap">
         <div className="container">
@@ -44,47 +56,45 @@ export default function LoginPage() {
             <div className="col-xl-8 col-lg-8 col-md-12 col-sm-12">
               <div className="_social_login_left">
                 <div className="_social_login_left_image">
-                  <img src="/assets/images/login.png" alt="Image" className="_left_img" />
+                  <img
+                    src="/assets/images/login.png"
+                    alt="Image"
+                    className="_left_img"
+                  />
                 </div>
               </div>
             </div>
             <div className="col-xl-4 col-lg-4 col-md-12 col-sm-12">
               <div className="_social_login_content">
                 <div className="_social_login_left_logo _mar_b28">
-                  <img src="/assets/images/logo.svg" alt="Image" className="_left_logo" />
+                  <img
+                    src="/assets/images/logo.svg"
+                    alt="Image"
+                    className="_left_logo"
+                  />
                 </div>
-                <p className="_social_login_content_para _mar_b8">Welcome back</p>
-                <h4 className="_social_login_content_title _titl4 _mar_b50">Login to your account</h4>
-                
+                <p className="_social_login_content_para _mar_b8">
+                  Welcome back
+                </p>
+                <h4 className="_social_login_content_title _titl4 _mar_b50">
+                  Login to your account
+                </h4>
+
                 {/* Google Sign In Button */}
-                <GoogleSignInButton />
-                
-                <div className="_social_login_or _mar_b14" style={{ textAlign: 'center', position: 'relative' }}>
-                  <span style={{ 
-                    background: 'white', 
-                    padding: '0 10px', 
-                    position: 'relative', 
-                    zIndex: 1,
-                    color: '#666'
-                  }}>
-                    OR
-                  </span>
-                  <div style={{ 
-                    position: 'absolute', 
-                    top: '50%', 
-                    left: 0, 
-                    right: 0, 
-                    height: '1px', 
-                    background: '#dadce0',
-                    zIndex: 0
-                  }}></div>
+                <GoogleSignInButton btnText="Or sign-in with google" />
+
+                <div className="_social_login_content_bottom_txt _mar_b40">
+                  {" "}
+                  <span>Or</span>
                 </div>
-                
+
                 <form className="_social_login_form" onSubmit={handleSubmit}>
                   <div className="row">
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_social_login_form_input _mar_b14">
-                        <label className="_social_login_label _mar_b8">Email</label>
+                        <label className="_social_login_label _mar_b8">
+                          Email
+                        </label>
                         <input
                           type="email"
                           className="form-control _social_login_input"
@@ -96,7 +106,9 @@ export default function LoginPage() {
                     </div>
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_social_login_form_input _mar_b14">
-                        <label className="_social_login_label _mar_b8">Password</label>
+                        <label className="_social_login_label _mar_b8">
+                          Password
+                        </label>
                         <input
                           type="password"
                           className="form-control _social_login_input"
@@ -112,27 +124,36 @@ export default function LoginPage() {
                       <div className="form-check _social_login_form_check">
                         <input
                           className="form-check-input _social_login_form_check_input"
-                          type="checkbox"
+                          type="radio"
                           id="rememberMe"
                           checked={rememberMe}
                           onChange={(e) => setRememberMe(e.target.checked)}
                         />
-                        <label className="form-check-label _social_login_form_check_label" htmlFor="rememberMe">
+                        <label
+                          className="form-check-label _social_login_form_check_label"
+                          htmlFor="rememberMe"
+                        >
                           Remember me
                         </label>
                       </div>
                     </div>
                     <div className="col-lg-6 col-xl-6 col-md-6 col-sm-12">
                       <div className="_social_login_form_left">
-                        <p className="_social_login_form_left_para">Forgot password?</p>
+                        <p className="_social_login_form_left_para">
+                          Forgot password?
+                        </p>
                       </div>
                     </div>
                   </div>
                   <div className="row">
                     <div className="col-lg-12 col-md-12 col-xl-12 col-sm-12">
                       <div className="_social_login_form_btn _mar_t40 _mar_b60">
-                        <button type="submit" className="_social_login_form_btn_link _btn1" disabled={loading}>
-                          {loading ? 'Logging in...' : 'Login now'}
+                        <button
+                          type="submit"
+                          className="_social_login_form_btn_link _btn1"
+                          disabled={loading}
+                        >
+                          {loading ? "Logging in..." : "Login now"}
                         </button>
                       </div>
                     </div>
@@ -142,7 +163,8 @@ export default function LoginPage() {
                   <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div className="_social_login_bottom_txt">
                       <p className="_social_login_bottom_txt_para">
-                        Don't have an account? <Link href="/register">Create New Account</Link>
+                        Don&apos;t have an account?{" "}
+                        <Link href="/register">Create New Account</Link>
                       </p>
                     </div>
                   </div>
