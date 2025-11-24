@@ -11,6 +11,7 @@ import api from "@/lib/api";
 import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/AuthContext";
 import { ReactionBarSelector } from "@charkour/react-reactions";
+import ReactorsModal from "./ReactorsModal";
 
 interface User {
   _id: string;
@@ -78,6 +79,9 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
     }>({});
     const [hideTimeout, setHideTimeout] = useState<{
       [key: string]: NodeJS.Timeout | null;
+    }>({});
+    const [showReactorsModal, setShowReactorsModal] = useState<{
+      [key: string]: boolean;
     }>({});
     const commentImageInputRef = useRef<HTMLInputElement>(null);
     const commentInputRef = useRef<HTMLTextAreaElement>(null);
@@ -482,7 +486,11 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
                       {/* Reaction Summary */}
 
                       {reactionSummary && (
-                        <div className="_total_reactions">
+                        <div 
+                          className="_total_reactions"
+                          onClick={() => setShowReactorsModal({ ...showReactorsModal, [comment._id]: true })}
+                          style={{ cursor: 'pointer' }}
+                        >
                           <div className="_total_react">
                             {reactionSummary.types.map((type, index) => (
                               <span
@@ -851,6 +859,14 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
                           </div>
                         ))}
                       </div>
+                    )}
+
+                    {/* Reactors Modal for this comment */}
+                    {showReactorsModal[comment._id] && comment.reactions && comment.reactions.length > 0 && (
+                      <ReactorsModal
+                        reactions={comment.reactions}
+                        onClose={() => setShowReactorsModal({ ...showReactorsModal, [comment._id]: false })}
+                      />
                     )}
                   </div>
                 </div>

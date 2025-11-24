@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/AuthContext";
 import Comments, { CommentsHandle } from "./Comments";
 import { ReactionBarSelector } from "@charkour/react-reactions";
+import ReactorsModal from "./ReactorsModal";
 
 interface User {
   _id: string;
@@ -45,6 +46,7 @@ export default function Post({ post, onUpdate }: PostProps) {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
   const [commentCount, setCommentCount] = useState(0);
+  const [showReactorsModal, setShowReactorsModal] = useState(false);
 
   const handleFocusComment = () => {
     commentsRef.current?.focusInput();
@@ -379,7 +381,11 @@ export default function Post({ post, onUpdate }: PostProps) {
       </div>
 
       <div className="_feed_inner_timeline_total_reacts _padd_r24 _padd_l24 _mar_b26">
-        <div className="_feed_inner_timeline_total_reacts_image">
+        <div 
+          className="_feed_inner_timeline_total_reacts_image"
+          onClick={() => post.reactions && post.reactions.length > 0 && setShowReactorsModal(true)}
+          style={{ cursor: post.reactions && post.reactions.length > 0 ? 'pointer' : 'default' }}
+        >
           {(() => {
             // Get unique users who reacted or liked
             const uniqueUsers = new Map<string, User>();
@@ -561,6 +567,14 @@ export default function Post({ post, onUpdate }: PostProps) {
       </div>
 
       <Comments postId={post._id} ref={commentsRef} onCommentsCountChange={setCommentCount} />
+
+      {/* Reactors Modal */}
+      {showReactorsModal && post.reactions && post.reactions.length > 0 && (
+        <ReactorsModal
+          reactions={post.reactions}
+          onClose={() => setShowReactorsModal(false)}
+        />
+      )}
     </div>
   );
 }
