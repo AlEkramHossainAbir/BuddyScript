@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Comments, { CommentsHandle } from "./Comments";
 import { ReactionBarSelector } from "@charkour/react-reactions";
 import ReactorsModal from "./ReactorsModal";
+import ConfirmModal from "./ConfirmModal";
 
 interface User {
   _id: string;
@@ -47,6 +48,7 @@ export default function Post({ post, onUpdate }: PostProps) {
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
   const [commentCount, setCommentCount] = useState(0);
   const [showReactorsModal, setShowReactorsModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleFocusComment = () => {
     commentsRef.current?.focusInput();
@@ -121,11 +123,8 @@ export default function Post({ post, onUpdate }: PostProps) {
     }
   };
 
-  const handleDeletePost = async () => {
-    if (!window.confirm("Are you sure you want to delete this post?")) {
-      return;
-    }
-
+  const confirmDeletePost = async () => {
+    setShowDeleteConfirm(false);
     try {
       await api.delete(`/posts/${post._id}`);
       toast.success("Post deleted successfully!");
@@ -305,7 +304,10 @@ export default function Post({ post, onUpdate }: PostProps) {
                     </li>
                     <li className="_feed_timeline_dropdown_item">
                       <button
-                        onClick={handleDeletePost}
+                        onClick={() => {
+                          setShowDeleteConfirm(true);
+                          setShowDropdown(false);
+                        }}
                         className="_feed_timeline_dropdown_link"
                         style={{
                           background: "none",
@@ -573,6 +575,19 @@ export default function Post({ post, onUpdate }: PostProps) {
         <ReactorsModal
           reactions={post.reactions}
           onClose={() => setShowReactorsModal(false)}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <ConfirmModal
+          title="Delete Post"
+          message="Are you sure you want to delete this post? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={confirmDeletePost}
+          onCancel={() => setShowDeleteConfirm(false)}
+          danger={true}
         />
       )}
     </div>
