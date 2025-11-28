@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface CreatePostProps {
-  onPostCreated: () => void;
+  onPostCreated: (newPost: any) => void;
 }
 
 export default function CreatePost({ onPostCreated }: CreatePostProps) {
@@ -47,7 +47,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
         formData.append("image", image);
       }
 
-      await api.post("/posts", formData, {
+      const response = await api.post("/posts", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -58,7 +58,11 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
       setImage(null);
       setImagePreview(null);
       setIsPrivate(false);
-      onPostCreated();
+      
+      // Pass the new post to parent instead of triggering full reload
+      if (response.data.post) {
+        onPostCreated(response.data.post);
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.error || "Failed to create post");
     } finally {

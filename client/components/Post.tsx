@@ -36,7 +36,7 @@ interface PostType {
 interface PostProps {
   post: PostType;
   onUpdate: () => void;
-  onPostUpdate?: (postId: string, updatedPost: PostType) => void;
+  onPostUpdate?: (postId: string, updatedPost: PostType | null) => void;
 }
 
 export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
@@ -113,11 +113,15 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
       // Make API call
       const response = await api.post(`/posts/${localPost._id}/like`, { reactionType });
       
-      // Update with server response if callback provided
-      if (onPostUpdate && response.data.post) {
-        onPostUpdate(localPost._id, response.data.post);
+      // Update with server response to get accurate reactor data
+      if (response.data.post) {
+        setLocalPost(response.data.post);
+        // Also update parent state if callback provided
+        if (onPostUpdate) {
+          onPostUpdate(localPost._id, response.data.post);
+        }
       }
-    } catch (error) {
+    } catch {
       // Revert optimistic update on error
       setLocalPost(post);
       toast.error("Failed to react to post");
@@ -164,11 +168,17 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
     }
 
     try {
-      await api.put(`/posts/${post._id}`, { content: editContent });
+      const response = await api.put(`/posts/${post._id}`, { content: editContent });
+      const updatedPost = response.data.post;
+      setLocalPost(updatedPost);
       toast.success("Post updated successfully!");
       setIsEditing(false);
       setShowDropdown(false);
-      onUpdate();
+      if (onPostUpdate) {
+        onPostUpdate(post._id, updatedPost);
+      } else {
+        onUpdate();
+      }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } };
       toast.error(err.response?.data?.error || "Failed to update post");
@@ -180,7 +190,12 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
     try {
       await api.delete(`/posts/${post._id}`);
       toast.success("Post deleted successfully!");
-      onUpdate();
+      // Remove post from parent state without full reload
+      if (onPostUpdate) {
+        onPostUpdate(post._id, null);
+      } else {
+        onUpdate();
+      }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } };
       toast.error(err.response?.data?.error || "Failed to delete post");
@@ -437,8 +452,8 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
       <div className="_feed_inner_timeline_total_reacts _padd_r24 _padd_l24 _mar_b26">
         <div 
           className="_feed_inner_timeline_total_reacts_image"
-          onClick={() => post.reactions && post.reactions.length > 0 && setShowReactorsModal(true)}
-          style={{ cursor: post.reactions && post.reactions.length > 0 ? 'pointer' : 'default' }}
+          onClick={() => localPost.reactions && localPost.reactions.length > 0 && setShowReactorsModal(true)}
+          style={{ cursor: localPost.reactions && localPost.reactions.length > 0 ? 'pointer' : 'default' }}
         >
           {(() => {
             // Get unique users who reacted or liked

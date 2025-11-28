@@ -101,8 +101,8 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
       },
     }));
 
-    const loadComments = async () => {
-      if (commentsLoaded) return; // Don't reload if already loaded
+    const loadComments = async (forceReload = false) => {
+      if (commentsLoaded && !forceReload) return; // Don't reload if already loaded unless forced
       
       setIsLoadingComments(true);
       try {
@@ -197,7 +197,7 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
         setCommentContent("");
         setCommentImage(null);
         setCommentImagePreview("");
-        loadComments();
+        await loadComments(true); // Force reload to show new comment
         toast.success("Comment added!");
       } catch {
         toast.error("Failed to add comment");
@@ -233,7 +233,7 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
         setReplyContent({ ...replyContent, [commentId]: "" });
         setReplyImage({ ...replyImage, [commentId]: null });
         setReplyImagePreview({ ...replyImagePreview, [commentId]: "" });
-        loadComments();
+        await loadComments(true); // Force reload to show new reply
         toast.success("Reply added!");
       } catch {
         toast.error("Failed to add reply");
@@ -247,7 +247,7 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
       try {
         await api.post(`/comments/${commentId}/like`, { reactionType });
         setShowReactionPicker({ ...showReactionPicker, [commentId]: false });
-        loadComments();
+        await loadComments(true); // Force reload to show updated reactions
       } catch {
         toast.error("Failed to react to comment");
       }

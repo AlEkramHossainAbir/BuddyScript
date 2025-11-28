@@ -85,10 +85,20 @@ export default function FeedPage() {
     loadPosts(1, false);
   };
 
-  const handlePostUpdate = (postId: string, updatedPost: PostType) => {
-    setPosts(prevPosts => 
-      prevPosts.map(p => p._id === postId ? updatedPost : p)
-    );
+  const handleNewPost = (newPost: PostType) => {
+    // Prepend new post to the beginning of the list
+    setPosts(prevPosts => [newPost, ...prevPosts]);
+  };
+
+  const handlePostUpdate = (postId: string, updatedPost: PostType | null) => {
+    setPosts(prevPosts => {
+      if (updatedPost === null) {
+        // Post was deleted, remove it from the list
+        return prevPosts.filter(p => p._id !== postId);
+      }
+      // Post was updated, replace it
+      return prevPosts.map(p => p._id === postId ? updatedPost : p);
+    });
   };
 
   useEffect(() => {
@@ -129,7 +139,7 @@ export default function FeedPage() {
                 <div className="_layout_middle_wrap">
                   <div className="_layout_middle_inner">
                     <PeopleStory />
-                    <CreatePost onPostCreated={refreshPosts} />
+                    <CreatePost onPostCreated={handleNewPost} />
                     
                     {posts.length === 0 ? (
                       <div className="_feed_inner_timeline_post_area _b_radious6 _padd_t24 _padd_b24 _padd_r24 _padd_l24 _mar_b16">

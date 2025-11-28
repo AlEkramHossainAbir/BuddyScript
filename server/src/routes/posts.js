@@ -233,6 +233,14 @@ router.put('/:id', authMiddleware, async (req, res) => {
     post.content = content;
     await post.save();
     await post.populate('author', 'firstName lastName profilePicture');
+    await post.populate({
+      path: 'likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
 
     res.json({ message: 'Post updated successfully', post });
   } catch (error) {
