@@ -48,6 +48,7 @@ interface Comment {
 interface CommentsProps {
   postId: string;
   onCommentsCountChange?: (count: number) => void;
+  initiallyExpanded?: boolean;
 }
 
 export interface CommentsHandle {
@@ -55,7 +56,7 @@ export interface CommentsHandle {
 }
 
 const Comments = forwardRef<CommentsHandle, CommentsProps>(
-  ({ postId, onCommentsCountChange }, ref) => {
+  ({ postId, onCommentsCountChange, initiallyExpanded = false }, ref) => {
     const { user } = useAuth();
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentContent, setCommentContent] = useState("");
@@ -83,6 +84,8 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
     const [showReactorsModal, setShowReactorsModal] = useState<{
       [key: string]: boolean;
     }>({});
+    const [commentsLoaded, setCommentsLoaded] = useState(initiallyExpanded);
+    const [isLoadingComments, setIsLoadingComments] = useState(false);
     const commentImageInputRef = useRef<HTMLInputElement>(null);
     const commentInputRef = useRef<HTMLTextAreaElement>(null);
     const replyImageInputRefs = useRef<{
@@ -99,18 +102,27 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
     }));
 
     const loadComments = async () => {
+      if (commentsLoaded) return; // Don't reload if already loaded
+      
+      setIsLoadingComments(true);
       try {
         const response = await api.get(`/comments/post/${postId}`);
         setComments(response.data.comments || []);
+        setCommentsLoaded(true);
       } catch {
         console.error("Failed to load comments");
+      } finally {
+        setIsLoadingComments(false);
       }
     };
 
+    // Only load comments when initiallyExpanded is true
     useEffect(() => {
-      loadComments();
+      if (initiallyExpanded) {
+        loadComments();
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [postId]);
+    }, [postId, initiallyExpanded]);
 
     useEffect(() => {
       if (onCommentsCountChange) {
@@ -316,6 +328,7 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
           <form
             className="_feed_inner_comment_box_form"
             onSubmit={handleCommentSubmit}
+            onClick={() => !commentsLoaded && loadComments()} // Load comments when user clicks to comment
           >
             <div className="_feed_inner_comment_box_content">
               <div className="_feed_inner_comment_box_content_image">
@@ -422,7 +435,11 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
         </div>
 
         {/* Comments List */}
-        {comments.length > 0 && (
+        {isLoadingComments ? (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#65676b' }}>
+            Loading comments...
+          </div>
+        ) : commentsLoaded && comments.length > 0 ? (
           <div className="_timline_comment_main">
             {/* View Previous Comments Button */}
             {!showAllComments && hiddenCommentsCount > 0 && (
@@ -873,7 +890,7 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
               );
             })}
           </div>
-        )}
+        ) : null}
       </div>
     );
   }

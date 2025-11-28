@@ -80,6 +80,8 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 // Get comments for a post
 router.get('/post/:postId', authMiddleware, async (req, res) => {
   try {
+    const limit = parseInt(req.query.limit) || 50; // Default 50 comments
+    
     const comments = await Comment.find({ post: req.params.postId })
       .populate('author', 'firstName lastName profilePicture')
       .populate({
@@ -97,7 +99,9 @@ router.get('/post/:postId', authMiddleware, async (req, res) => {
           { path: 'likes', select: 'firstName lastName profilePicture' }
         ]
       })
-      .sort({ createdAt: 1 });
+      .sort({ createdAt: 1 })
+      .limit(limit)
+      .lean(); // Use lean() for better performance
 
     res.json({ comments });
   } catch (error) {

@@ -72,15 +72,24 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   }
 });
 
-// Get all posts (newest first)
+// Get all posts (newest first) with pagination
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const posts = await Post.find({
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const query = {
       $or: [
         { isPrivate: false },
         { author: req.userId, isPrivate: true }
       ]
-    })
+    };
+
+    // Get total count for pagination info
+    const totalPosts = await Post.countDocuments(query);
+    
+    const posts = await Post.find(query)
       .populate('author', 'firstName lastName profilePicture')
       .populate({
         path: 'likes',
@@ -90,9 +99,20 @@ router.get('/', authMiddleware, async (req, res) => {
         path: 'reactions.user',
         select: 'firstName lastName profilePicture'
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(); // Use lean() for better performance
 
-    res.json({ posts });
+    res.json({ 
+      posts,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalPosts / limit),
+        totalPosts,
+        hasMore: skip + posts.length < totalPosts
+      }
+    });
   } catch (error) {
     console.error('Get posts error:', error);
     res.status(500).json({ error: 'Server error' });
