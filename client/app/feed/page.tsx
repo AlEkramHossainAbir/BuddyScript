@@ -85,6 +85,12 @@ export default function FeedPage() {
     loadPosts(1, false);
   };
 
+  const handlePostUpdate = (postId: string, updatedPost: PostType) => {
+    setPosts(prevPosts => 
+      prevPosts.map(p => p._id === postId ? updatedPost : p)
+    );
+  };
+
   useEffect(() => {
     if (user) {
       loadPosts();
@@ -132,7 +138,12 @@ export default function FeedPage() {
                     ) : (
                       <>
                         {posts.map((post: PostType) => (
-                          <Post key={post._id} post={post} onUpdate={refreshPosts} />
+                          <Post 
+                            key={post._id} 
+                            post={post} 
+                            onUpdate={refreshPosts}
+                            onPostUpdate={handlePostUpdate}
+                          />
                         ))}
                         
                         {/* Load More Button */}

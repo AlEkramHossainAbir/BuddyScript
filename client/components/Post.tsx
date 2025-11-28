@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import api from "@/lib/api";
 import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,9 +36,10 @@ interface PostType {
 interface PostProps {
   post: PostType;
   onUpdate: () => void;
+  onPostUpdate?: (postId: string, updatedPost: PostType) => void;
 }
 
-export default function Post({ post, onUpdate }: PostProps) {
+export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
   const { user } = useAuth();
   const commentsRef = useRef<CommentsHandle>(null);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -49,25 +50,76 @@ export default function Post({ post, onUpdate }: PostProps) {
   const [commentCount, setCommentCount] = useState(0);
   const [showReactorsModal, setShowReactorsModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [localPost, setLocalPost] = useState(post);
+
+  // Update local post when prop changes
+  useEffect(() => {
+    setLocalPost(post);
+  }, [post]);
 
   const handleFocusComment = () => {
     commentsRef.current?.focusInput();
   };
 
   // Find user's reaction if any
-  const userReaction = post.reactions?.find(
+  const userReaction = localPost.reactions?.find(
     (reaction) => reaction.user._id === user?.id
   );
-  const isLiked = post.likes.some((like) => like._id === user?.id);
+  const isLiked = localPost.likes.some((like) => like._id === user?.id);
 
   const handleReaction = async (
     reactionType: "like" | "love" | "haha" | "wow" | "sad" | "angry"
   ) => {
     try {
-      await api.post(`/posts/${post._id}/like`, { reactionType });
+      // Optimistic update - update UI immediately
+      const optimisticReactions = [...(localPost.reactions || [])];
+      const existingReactionIndex = optimisticReactions.findIndex(
+        (r) => r.user._id === user?.id
+      );
+
+      if (existingReactionIndex !== -1) {
+        // User already reacted, update or remove
+        if (optimisticReactions[existingReactionIndex].type === reactionType) {
+          // Same reaction - remove it (toggle off)
+          optimisticReactions.splice(existingReactionIndex, 1);
+        } else {
+          // Different reaction - update it
+          optimisticReactions[existingReactionIndex] = {
+            ...optimisticReactions[existingReactionIndex],
+            type: reactionType,
+          };
+        }
+      } else {
+        // New reaction - add it
+        optimisticReactions.push({
+          user: {
+            _id: user!.id,
+            firstName: user!.firstName,
+            lastName: user!.lastName,
+            profilePicture: user!.profilePicture,
+          },
+          type: reactionType,
+        });
+      }
+
+      // Update local state immediately
+      const optimisticPost = {
+        ...localPost,
+        reactions: optimisticReactions,
+      };
+      setLocalPost(optimisticPost);
       setShowReactionPicker(false);
-      onUpdate();
-    } catch {
+
+      // Make API call
+      const response = await api.post(`/posts/${localPost._id}/like`, { reactionType });
+      
+      // Update with server response if callback provided
+      if (onPostUpdate && response.data.post) {
+        onPostUpdate(localPost._id, response.data.post);
+      }
+    } catch (error) {
+      // Revert optimistic update on error
+      setLocalPost(post);
       toast.error("Failed to react to post");
     }
   };
@@ -139,7 +191,7 @@ export default function Post({ post, onUpdate }: PostProps) {
     setShowDropdown(!showDropdown);
   };
 
-  const isOwnPost = user?.id === post.author._id;
+  const isOwnPost = user?.id === localPost.author._id;
 
   return (
     <div className="_feed_inner_timeline_post_area _b_radious6 _padd_b24 _padd_t24 _mar_b16">
@@ -148,18 +200,18 @@ export default function Post({ post, onUpdate }: PostProps) {
           <div className="_feed_inner_timeline_post_box">
             <div className="_feed_inner_timeline_post_box_image">
               <img
-                src={post.author.profilePicture}
+                src={localPost.author.profilePicture}
                 alt=""
                 className="_post_img"
               />
             </div>
             <div className="_feed_inner_timeline_post_box_txt">
               <h4 className="_feed_inner_timeline_post_box_title">
-                {post.author.firstName} {post.author.lastName}
+                {localPost.author.firstName} {localPost.author.lastName}
               </h4>
               <p className="_feed_inner_timeline_post_box_para">
-                {formatDate(post.createdAt)} ·{" "}
-                <a href="#0">{post.isPrivate ? "Private" : "Public"}</a>
+                {formatDate(localPost.createdAt)} ·{" "}
+                <a href="#0">{localPost.isPrivate ? "Private" : "Public"}</a>
               </p>
             </div>
           </div>
@@ -362,19 +414,19 @@ export default function Post({ post, onUpdate }: PostProps) {
               className="btn btn-secondary btn-sm"
               onClick={() => {
                 setIsEditing(false);
-                setEditContent(post.content);
+                setEditContent(localPost.content);
               }}
             >
               Cancel
             </button>
           </div>
         ) : (
-          <h4 className="_feed_inner_timeline_post_title">{post.content}</h4>
+          <h4 className="_feed_inner_timeline_post_title">{localPost.content}</h4>
         )}
-        {post.image && (
+        {localPost.image && (
           <div className="_feed_inner_timeline_image">
             <img
-              src={post.image.startsWith('http') ? post.image : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}${post.image}`}
+              src={localPost.image.startsWith('http') ? localPost.image : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}${localPost.image}`}
               alt=""
               className="_time_img"
             />
@@ -392,8 +444,8 @@ export default function Post({ post, onUpdate }: PostProps) {
             // Get unique users who reacted or liked
             const uniqueUsers = new Map<string, User>();
 
-            post.reactions?.forEach(r => uniqueUsers.set(r.user._id, r.user));
-            post.likes?.forEach(l => uniqueUsers.set(l._id, l));
+            localPost.reactions?.forEach(r => uniqueUsers.set(r.user._id, r.user));
+            localPost.likes?.forEach(l => uniqueUsers.set(l._id, l));
 
             const users = Array.from(uniqueUsers.values()).slice(0, 5);
             const totalCount = uniqueUsers.size;
@@ -568,12 +620,12 @@ export default function Post({ post, onUpdate }: PostProps) {
         </button>
       </div>
 
-      <Comments postId={post._id} ref={commentsRef} onCommentsCountChange={setCommentCount} />
+      <Comments postId={localPost._id} ref={commentsRef} onCommentsCountChange={setCommentCount} />
 
       {/* Reactors Modal */}
-      {showReactorsModal && post.reactions && post.reactions.length > 0 && (
+      {showReactorsModal && localPost.reactions && localPost.reactions.length > 0 && (
         <ReactorsModal
-          reactions={post.reactions}
+          reactions={localPost.reactions}
           onClose={() => setShowReactorsModal(false)}
         />
       )}
