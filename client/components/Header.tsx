@@ -8,6 +8,7 @@ export default function Header() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showNotificationDropdown, setShowNotificationDropdown] =
     useState(false);
+  const [showNotificationActions, setShowNotificationActions] = useState(false);
 
   const notifications = [
     {
@@ -77,7 +78,7 @@ export default function Header() {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="navbar-collapse" id="navbarSupportedContent">
+        <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <div className="_header_form ms-auto">
             <form className="_header_form_grp">
               <svg
@@ -162,7 +163,6 @@ export default function Header() {
                 onClick={() =>
                   setShowNotificationDropdown(!showNotificationDropdown)
                 }
-                style={{ cursor: "pointer" }}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -195,6 +195,10 @@ export default function Header() {
                       <button
                         type="button"
                         className="_notification_box_right_link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowNotificationActions(!showNotificationActions);
+                        }}
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -208,22 +212,19 @@ export default function Header() {
                           <circle cx="2" cy="15" r="2" fill="#C4C4C4"></circle>
                         </svg>
                       </button>
-                      <div className="_notifications_drop_right">
+                      <div
+                        className="_notifications_drop_right"
+                        style={{ display: showNotificationActions ? "block" : "none" }}
+                      >
                         <ul className="_notification_list">
                           <li className="_notification_item">
-                            <button type="button" className="_notification_link">
-                              Mark all as read
-                            </button>
+                            <span className="_notification_link">Mark as all read</span>
                           </li>
                           <li className="_notification_item">
-                            <button type="button" className="_notification_link">
-                              Notification settings
-                            </button>
+                            <span className="_notification_link">Notifivations seetings</span>
                           </li>
                           <li className="_notification_item">
-                            <button type="button" className="_notification_link">
-                              Clear all
-                            </button>
+                            <span className="_notification_link">Open Notifications</span>
                           </li>
                         </ul>
                       </div>
@@ -250,7 +251,8 @@ export default function Header() {
                           </div>
                           <div className="_notification_txt">
                             <p className="_notification_para">
-                              <b>{item.actor}</b> {item.action}
+                              <span className="_notify_txt_link">{item.actor}</span>{" "}
+                              {item.action}
                             </p>
                             <div className="_nitification_time">
                               <span>{item.time}</span>

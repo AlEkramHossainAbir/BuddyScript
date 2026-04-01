@@ -3,6 +3,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastContainer } from 'react-toastify';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import 'react-toastify/dist/ReactToastify.css';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: "Buddy Script - Social Network",

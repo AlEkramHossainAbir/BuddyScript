@@ -1,0 +1,30 @@
+html,
+body {
+	font-family: 'Poppins', sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+/* In converted components, some anchor/span elements became buttons. */
+button._notification_link,
+button._feed_timeline_dropdown_link,
+button._nav_dropdown_link,
+button._notifications_btn_link,
+button._notifications_btn_link1 {
+	font-family: inherit;
+}
+
+button._notification_link,
+button._feed_timeline_dropdown_link,
+button._nav_dropdown_link {
+	background: transparent;
+	border: none;
+	text-align: left;
+	width: 100%;
+}

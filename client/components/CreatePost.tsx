@@ -16,7 +16,6 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
   const [isPrivate, setIsPrivate] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showVisibilityDropdown, setShowVisibilityDropdown] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,132 +80,21 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
               className="_txt_img"
             />
           </div>
-          <div className="_feed_inner_text_area_box_form" style={{ position: 'relative' }}>
-            <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
-              <div style={{ position: 'relative' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowVisibilityDropdown(!showVisibilityDropdown)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '6px 12px',
-                    backgroundColor: '#E4E6EB',
-                    borderRadius: '6px',
-                    border: 'none',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    color: '#050505',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#D8DADF'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#E4E6EB'}
-                >
-                  {isPrivate ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="2" y1="12" x2="22" y2="12"></line>
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                    </svg>
-                  )}
-                  <span>{isPrivate ? 'Private' : 'Public'}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </button>
-
-                {showVisibilityDropdown && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: '0',
-                    marginTop: '8px',
-                    backgroundColor: '#fff',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
-                    padding: '8px',
-                    width: '140px',
-                    zIndex: 100
-                  }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsPrivate(false);
-                        setShowVisibilityDropdown(false);
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        width: '100%',
-                        padding: '8px',
-                        border: 'none',
-                        background: 'none',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        color: '#050505',
-                        textAlign: 'left'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0F2F5'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="2" y1="12" x2="22" y2="12"></line>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                      </svg>
-                      Public
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsPrivate(true);
-                        setShowVisibilityDropdown(false);
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        width: '100%',
-                        padding: '8px',
-                        border: 'none',
-                        background: 'none',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        color: '#050505',
-                        textAlign: 'left'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0F2F5'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                      </svg>
-                      Private
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="form-floating _feed_inner_text_area_box_form">
             <textarea
               className="form-control _textarea"
-              placeholder="Write something ..."
+              placeholder="Leave a comment here"
               id="floatingTextarea"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={3}
-              style={{ paddingRight: '140px' }}
             />
+            <label className="_feed_textarea_label" htmlFor="floatingTextarea">
+              Write something ...
+              <svg xmlns="http://www.w3.org/2000/svg" width="23" height="24" fill="none" viewBox="0 0 23 24">
+                <path fill="#666" d="M19.504 19.209c.332 0 .601.289.601.646 0 .326-.226.596-.52.64l-.081.005h-6.276c-.332 0-.602-.289-.602-.645 0-.327.227-.597.52-.64l.082-.006h6.276zM13.4 4.417c1.139-1.223 2.986-1.223 4.125 0l1.182 1.268c1.14 1.223 1.14 3.205 0 4.427L9.82 19.649a2.619 2.619 0 01-1.916.85h-3.64c-.337 0-.61-.298-.6-.66l.09-3.941a3.019 3.019 0 01.794-1.982l8.852-9.5zm-.688 2.562l-7.313 7.85a1.68 1.68 0 00-.441 1.101l-.077 3.278h3.023c.356 0 .698-.133.968-.376l.098-.096 7.35-7.887-3.608-3.87zm3.962-1.65a1.633 1.633 0 00-2.423 0l-.688.737 3.606 3.87.688-.737c.631-.678.666-1.755.105-2.477l-.105-.124-1.183-1.268z" />
+              </svg>
+            </label>
 
           </div>
 
