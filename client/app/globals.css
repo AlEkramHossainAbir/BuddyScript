@@ -1,3 +1,8 @@
+@import url('../public/assets/css/bootstrap.min.css');
+@import url('../public/assets/css/common.css');
+@import url('../public/assets/css/main.css');
+@import url('../public/assets/css/responsive.css');
+
 html,
 body {
 	font-family: 'Poppins', sans-serif;
