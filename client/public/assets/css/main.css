@@ -5911,7 +5911,6 @@
     padding: 12px;
     border-radius: 18px;
     width: 100%;
-    max-width: fit-content;
     position: relative;
     margin: 0 0 50px;
 }

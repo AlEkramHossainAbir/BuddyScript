@@ -9,6 +9,51 @@ export default function Header() {
   const [showNotificationDropdown, setShowNotificationDropdown] =
     useState(false);
 
+  const notifications = [
+    {
+      id: 1,
+      image: "/assets/images/friend-req.png",
+      actor: "Elon Musk",
+      action: "sent you a connection request.",
+      time: "2m ago",
+    },
+    {
+      id: 2,
+      image: "/assets/images/profile-1.png",
+      actor: "Mark Zuckerberg",
+      action: "commented on your post.",
+      time: "8m ago",
+    },
+    {
+      id: 3,
+      image: "/assets/images/friend-req.png",
+      actor: "Steve Jobs",
+      action: "reacted to your story.",
+      time: "13m ago",
+    },
+    {
+      id: 4,
+      image: "/assets/images/profile-1.png",
+      actor: "Sundar Pichai",
+      action: "mentioned you in a comment.",
+      time: "25m ago",
+    },
+    {
+      id: 5,
+      image: "/assets/images/friend-req.png",
+      actor: "Satya Nadella",
+      action: "shared your post.",
+      time: "1h ago",
+    },
+    {
+      id: 6,
+      image: "/assets/images/profile-1.png",
+      actor: "Reed Hastings",
+      action: "started following you.",
+      time: "3h ago",
+    },
+  ];
+
   return (
     <nav className="navbar navbar-expand-lg navbar-light _header_nav _padd_t10">
       <div className="container _custom_container">
@@ -140,25 +185,79 @@ export default function Header() {
                   className={`_notification_dropdown ${
                     showNotificationDropdown ? "show" : ""
                   }`}
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <div className="_notifications_content">
                     <h4 className="_notifications_content_title">
                       Notifications
                     </h4>
+                    <div className="_notification_box_right">
+                      <button
+                        type="button"
+                        className="_notification_box_right_link"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="4"
+                          height="17"
+                          fill="none"
+                          viewBox="0 0 4 17"
+                        >
+                          <circle cx="2" cy="2" r="2" fill="#C4C4C4"></circle>
+                          <circle cx="2" cy="8" r="2" fill="#C4C4C4"></circle>
+                          <circle cx="2" cy="15" r="2" fill="#C4C4C4"></circle>
+                        </svg>
+                      </button>
+                      <div className="_notifications_drop_right">
+                        <ul className="_notification_list">
+                          <li className="_notification_item">
+                            <button type="button" className="_notification_link">
+                              Mark all as read
+                            </button>
+                          </li>
+                          <li className="_notification_item">
+                            <button type="button" className="_notification_link">
+                              Notification settings
+                            </button>
+                          </li>
+                          <li className="_notification_item">
+                            <button type="button" className="_notification_link">
+                              Clear all
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                   <div className="_notifications_drop_box">
                     <div className="_notifications_drop_btn_grp">
-                      <button className="_notifications_btn_link">
-                        All Notifications
+                      <button type="button" className="_notifications_btn_link">
+                        All
                       </button>
                       <button className="_notifications_btn_link1">
-                        Mentions
+                        Unread
                       </button>
                     </div>
                     <div className="_notifications_all">
-                      <p style={{ padding: "20px", textAlign: "center" }}>
-                        No notifications yet
-                      </p>
+                      {notifications.map((item) => (
+                        <div className="_notification_box" key={item.id}>
+                          <div className="_notification_image">
+                            <img
+                              src={item.image}
+                              alt="Image"
+                              className="_notify_img"
+                            />
+                          </div>
+                          <div className="_notification_txt">
+                            <p className="_notification_para">
+                              <b>{item.actor}</b> {item.action}
+                            </p>
+                            <div className="_nitification_time">
+                              <span>{item.time}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
