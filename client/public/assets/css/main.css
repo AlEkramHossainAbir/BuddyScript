@@ -850,6 +850,10 @@
     margin: 0 8px 0 0;
     width: 24px;
 }
+._nav_profile_img{
+    border-radius: 50%;
+    border: 1px solid #1890FF;
+}
 ._header_nav_dropdown {
     cursor:pointer;
     display: -webkit-box;
@@ -5552,6 +5556,8 @@
 ._nav_drop_img {
     width:54px;
     height:54px;
+    border-radius: 50%;
+    border: 2px solid #1890FF;
 }
 ._nav_dropdown_title {
     font-weight: bold;
