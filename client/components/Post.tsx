@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import api from "@/lib/api";
 import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,36 +9,15 @@ import Comments, { CommentsHandle } from "./Comments";
 import { ReactionBarSelector } from "@charkour/react-reactions";
 import ReactorsModal from "./ReactorsModal";
 import ConfirmModal from "./ConfirmModal";
-
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  profilePicture: string;
-}
-
-interface Reaction {
-  user: User;
-  type: "like" | "love" | "haha" | "wow" | "sad" | "angry";
-  _id?: string;
-}
-
-interface PostType {
-  _id: string;
-  content: string;
-  image?: string;
-  author: User;
-  likes: User[];
-  reactions: Reaction[];
-  isPrivate: boolean;
-  createdAt: string;
-}
+import { AppUser, PostType, ReactionType } from "@/types/social";
 
 interface PostProps {
   post: PostType;
   onUpdate: () => void;
   onPostUpdate?: (postId: string, updatedPost: PostType | null) => void;
 }
+
+const passthroughImageLoader = ({ src }: { src: string }) => src;
 
 export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
   const { user } = useAuth();
@@ -46,7 +26,7 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
-  const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [hideTimeout, setHideTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [commentCount, setCommentCount] = useState(0);
   const [showReactorsModal, setShowReactorsModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -67,9 +47,7 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
   );
   const isLiked = localPost.likes.some((like) => like._id === user?.id);
 
-  const handleReaction = async (
-    reactionType: "like" | "love" | "haha" | "wow" | "sad" | "angry"
-  ) => {
+  const handleReaction = async (reactionType: ReactionType) => {
     try {
       // Optimistic update - update UI immediately
       const optimisticReactions = [...(localPost.reactions || [])];
@@ -214,10 +192,14 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
         <div className="_feed_inner_timeline_post_top">
           <div className="_feed_inner_timeline_post_box">
             <div className="_feed_inner_timeline_post_box_image">
-              <img
+              <Image
+                loader={passthroughImageLoader}
+                unoptimized
                 src={localPost.author.profilePicture}
-                alt=""
+                alt={`${localPost.author.firstName} ${localPost.author.lastName}`}
                 className="_post_img"
+                width={48}
+                height={48}
               />
             </div>
             <div className="_feed_inner_timeline_post_box_txt">
@@ -440,10 +422,14 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
         )}
         {localPost.image && (
           <div className="_feed_inner_timeline_image">
-            <img
+            <Image
+              loader={passthroughImageLoader}
+              unoptimized
               src={localPost.image.startsWith('http') ? localPost.image : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}${localPost.image}`}
-              alt=""
+              alt="Post image"
               className="_time_img"
+              width={1200}
+              height={675}
             />
           </div>
         )}
@@ -457,7 +443,7 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
         >
           {(() => {
             // Get unique users who reacted or liked
-            const uniqueUsers = new Map<string, User>();
+            const uniqueUsers = new Map<string, AppUser>();
 
             localPost.reactions?.forEach(r => uniqueUsers.set(r.user._id, r.user));
             localPost.likes?.forEach(l => uniqueUsers.set(l._id, l));
@@ -468,14 +454,16 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
             return (
               <>
                 {users.map((u, index) => (
-                  <img
+                  <Image
+                    loader={passthroughImageLoader}
+                    unoptimized
                     key={u._id}
                     src={u.profilePicture}
                     alt={`${u.firstName} ${u.lastName}`}
                     className={`_react_img ${index === 0 ? '_react_img1' : ''} ${index > 1 ? '_rect_img_mbl_none' : ''}`}
+                    width={28}
+                    height={28}
                     style={{
-                      width: '28px',
-                      height: '28px',
                       borderRadius: '50%',
                       border: '2px solid #fff',
                       marginLeft: index === 0 ? '0' : '-8px',
@@ -522,7 +510,7 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
           onMouseLeave={handleMouseLeaveReaction}
         >
           <div onClick={() => {
-            handleReaction(userReaction?.type as "like" | "love" | "haha" | "wow" | "sad" | "angry");
+            handleReaction(userReaction?.type as ReactionType);
           }}>
             <span className="_feed_inner_timeline_reaction_link">
               <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>

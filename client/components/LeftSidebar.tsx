@@ -253,9 +253,7 @@ export default function LeftSidebar() {
                 <hr className="_underline" />
                 <div className="_left_inner_event_bottom">
                   <p className="_left_iner_event_bottom">{event.peopleGoing}</p>{" "}
-                  <a href="#0" className="_left_iner_event_bottom_link">
-                    Going
-                  </a>
+                  <span className="_left_iner_event_bottom_link">Going</span>
                 </div>
               </div>
             </a>

@@ -12,30 +12,8 @@ import ThemeSwitcher from '@/components/ThemeSwitcher';
 import LeftSidebar from '@/components/LeftSidebar';
 import RightSidebar from '@/components/RightSidebar';
 import PeopleStory from '@/components/PeopleStory';
-
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  profilePicture: string;
-}
-
-interface Reaction {
-  user: User;
-  type: "like" | "love" | "haha" | "wow" | "sad" | "angry";
-  _id?: string;
-}
-
-interface PostType {
-  _id: string;
-  content: string;
-  image?: string;
-  author: User;
-  likes: User[];
-  reactions: Reaction[];
-  isPrivate: boolean;
-  createdAt: string;
-}
+import { PostType } from '@/types/social';
+import { toast } from 'react-toastify';
 
 export default function FeedPage() {
   const { user, loading: authLoading } = useAuth();
@@ -68,7 +46,7 @@ export default function FeedPage() {
       setHasMore(response.data.pagination?.hasMore || false);
       setPage(pageNum);
     } catch {
-      console.error('Failed to load posts');
+      toast.error('Failed to load posts. Please refresh and try again.');
     } finally {
       setLoading(false);
       setLoadingMore(false);

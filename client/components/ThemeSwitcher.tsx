@@ -14,12 +14,13 @@ export default function ThemeSwitcher() {
     // Apply the saved theme on mount
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
-      document.body.classList.add('dark-mode');
+      document.body.classList.add('_dark_wrapper');
+    } else {
+      document.body.classList.remove('_dark_wrapper');
     }
   }, []);
 
   const toggleTheme = () => {
-    console.log('Toggling theme',isDark);  
     setIsDark(!isDark);
     if (!isDark) {
       document.body.classList.add('_dark_wrapper');

@@ -4,6 +4,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import Image from 'next/image';
+import { toast } from 'react-toastify';
 
 export default function GoogleSignInButton({btnText}: {btnText?: string}) {
   const { googleLogin } = useAuth();
@@ -25,14 +26,14 @@ export default function GoogleSignInButton({btnText}: {btnText?: string}) {
         const idToken = tokenResponse.access_token;
         
         await googleLogin(idToken);
-      } catch (error) {
-        console.error('Google login error:', error);
+      } catch {
+        toast.error('Google login failed. Please try again.');
       } finally {
         setLoading(false);
       }
     },
     onError: () => {
-      console.error('Google login failed');
+      toast.error('Google sign-in was cancelled or failed.');
     },
   });
 

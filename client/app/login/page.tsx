@@ -17,7 +17,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-    } catch (error) {
+    } catch {
       // Error handled in context
     } finally {
       setLoading(false);

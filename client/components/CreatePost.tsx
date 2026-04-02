@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import api from "@/lib/api";
+import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/AuthContext";
+import { PostType } from "@/types/social";
 
 interface CreatePostProps {
-  onPostCreated: (newPost: any) => void;
+  onPostCreated: (newPost: PostType) => void;
 }
 
 export default function CreatePost({ onPostCreated }: CreatePostProps) {
@@ -62,8 +64,8 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
       if (response.data.post) {
         onPostCreated(response.data.post);
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to create post");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to create post"));
     } finally {
       setLoading(false);
     }

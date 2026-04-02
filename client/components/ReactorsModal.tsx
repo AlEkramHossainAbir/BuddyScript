@@ -1,19 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  profilePicture: string;
-}
-
-interface Reaction {
-  user: User;
-  type: "like" | "love" | "haha" | "wow" | "sad" | "angry";
-  _id?: string;
-}
+import { Reaction, ReactionType } from "@/types/social";
 
 interface ReactorsModalProps {
   reactions: Reaction[];
@@ -45,7 +33,7 @@ export default function ReactorsModal({ reactions, onClose }: ReactorsModalProps
     };
   }, [onClose]);
 
-  const getReactionEmoji = (type: string) => {
+  const getReactionEmoji = (type: ReactionType) => {
     switch (type) {
       case "like":
         return "👍";
@@ -64,7 +52,7 @@ export default function ReactorsModal({ reactions, onClose }: ReactorsModalProps
     }
   };
 
-  const getReactionText = (type: string) => {
+  const getReactionText = (type: ReactionType) => {
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 

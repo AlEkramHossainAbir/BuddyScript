@@ -3,6 +3,7 @@
 import {
   useState,
   useEffect,
+  useCallback,
   useRef,
   forwardRef,
   useImperativeHandle,
@@ -12,34 +13,22 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/AuthContext";
 import { ReactionBarSelector } from "@charkour/react-reactions";
 import ReactorsModal from "./ReactorsModal";
-
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  profilePicture: string;
-}
+import { AppUser, Reaction, ReactionType } from "@/types/social";
 
 interface Reply {
   _id: string;
   content: string;
-  author: User;
-  likes: User[];
+  author: AppUser;
+  likes: AppUser[];
   createdAt: string;
-}
-
-interface Reaction {
-  user: User;
-  type: "like" | "love" | "haha" | "wow" | "sad" | "angry";
-  _id?: string;
 }
 
 interface Comment {
   _id: string;
   content: string;
   image?: string;
-  author: User;
-  likes: User[];
+  author: AppUser;
+  likes: AppUser[];
   reactions?: Reaction[];
   replies: Reply[];
   createdAt: string;
@@ -79,7 +68,7 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
       [key: string]: boolean;
     }>({});
     const [hideTimeout, setHideTimeout] = useState<{
-      [key: string]: NodeJS.Timeout | null;
+      [key: string]: ReturnType<typeof setTimeout> | null;
     }>({});
     const [showReactorsModal, setShowReactorsModal] = useState<{
       [key: string]: boolean;
@@ -101,7 +90,7 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
       },
     }));
 
-    const loadComments = async (forceReload = false) => {
+    const loadComments = useCallback(async (forceReload = false) => {
       if (commentsLoaded && !forceReload) return; // Don't reload if already loaded unless forced
       
       setIsLoadingComments(true);
@@ -110,19 +99,18 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
         setComments(response.data.comments || []);
         setCommentsLoaded(true);
       } catch {
-        console.error("Failed to load comments");
+        toast.error("Failed to load comments");
       } finally {
         setIsLoadingComments(false);
       }
-    };
+    }, [commentsLoaded, postId]);
 
     // Only load comments when initiallyExpanded is true
     useEffect(() => {
       if (initiallyExpanded) {
         loadComments();
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [postId, initiallyExpanded]);
+    }, [initiallyExpanded, loadComments]);
 
     useEffect(() => {
       if (onCommentsCountChange) {
@@ -242,7 +230,7 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
 
     const handleReaction = async (
       commentId: string,
-      reactionType: "like" | "love" | "haha" | "wow" | "sad" | "angry"
+      reactionType: ReactionType
     ) => {
       try {
         await api.post(`/comments/${commentId}/like`, { reactionType });

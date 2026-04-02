@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
 import Link from 'next/link';
+import { toast } from 'react-toastify';
 
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState('');
@@ -19,19 +20,19 @@ export default function RegisterPage() {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      toast.error('Passwords do not match');
       return;
     }
     
     if (!agreeTerms) {
-      alert('Please agree to terms & conditions');
+      toast.error('Please agree to terms & conditions');
       return;
     }
 
     setLoading(true);
     try {
       await register(firstName, lastName, email, password);
-    } catch (error) {
+    } catch {
       // Error handled in context
     } finally {
       setLoading(false);
