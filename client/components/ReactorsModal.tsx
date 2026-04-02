@@ -56,12 +56,18 @@ export default function ReactorsModal({ reactions, onClose }: ReactorsModalProps
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
+  const reactionTypes: ReactionType[] = ["like", "love", "haha", "wow", "sad", "angry"];
+
   // Group reactions by type
-  const reactionsByType: { [key: string]: Reaction[] } = {};
+  const reactionsByType: Record<ReactionType, Reaction[]> = {
+    like: [],
+    love: [],
+    haha: [],
+    wow: [],
+    sad: [],
+    angry: [],
+  };
   reactions.forEach((reaction) => {
-    if (!reactionsByType[reaction.type]) {
-      reactionsByType[reaction.type] = [];
-    }
     reactionsByType[reaction.type].push(reaction);
   });
 
@@ -159,25 +165,27 @@ export default function ReactorsModal({ reactions, onClose }: ReactorsModalProps
           >
             All {reactions.length}
           </div>
-          {Object.entries(reactionsByType).map(([type, typeReactions]) => (
-            <div
-              key={type}
-              style={{
-                padding: "6px 12px",
-                borderRadius: "20px",
-                backgroundColor: "#f0f2f5",
-                fontSize: "14px",
-                fontWeight: "500",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              <span style={{ fontSize: "16px" }}>{getReactionEmoji(type)}</span>
-              {typeReactions.length}
-            </div>
-          ))}
+          {reactionTypes
+            .filter((type) => reactionsByType[type].length > 0)
+            .map((type) => (
+              <div
+                key={type}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "20px",
+                  backgroundColor: "#f0f2f5",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span style={{ fontSize: "16px" }}>{getReactionEmoji(type)}</span>
+                {reactionsByType[type].length}
+              </div>
+            ))}
         </div>
 
         {/* Reactors List */}
