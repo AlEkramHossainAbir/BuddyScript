@@ -5,7 +5,6 @@ const path = require('path');
 const { ConnectDb } = require('./db');
 const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/posts');
-const commentRoutes = require('./routes/comments');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -51,7 +50,6 @@ ConnectDb(MONGODB_URI);
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
-// app.use('/api/comments', commentRoutes);
 
 // Root route - Welcome page
 app.get('/', (req, res) => {
