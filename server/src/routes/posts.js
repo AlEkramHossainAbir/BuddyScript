@@ -239,21 +239,45 @@ router.post('/:id/like', authMiddleware, async (req, res) => {
     }
 
     await post.save();
-    await post.populate([
-      {
-        path: 'likes',
-        select: 'firstName lastName profilePicture'
-      },
-      {
-        path: 'reactions.user',
-        select: 'firstName lastName profilePicture'
-      }
-    ]);
+    
+    // Populate all post data including author and nested reactions
+    await post.populate('author', 'firstName lastName profilePicture');
+    await post.populate({
+      path: 'likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.author',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.author',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
 
     res.json({ 
       message: 'Reaction updated',
-      likes: post.likes,
-      reactions: post.reactions
+      post
     });
   } catch (error) {
     console.error('React to post error:', error);

@@ -102,6 +102,50 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
 
         </div>
 
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: '12px', paddingRight: '16px', gap: '8px' }}>
+          <span style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>
+            {isPrivate ? "🔒 Private" : "🌐 Public"}
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsPrivate(!isPrivate)}
+            style={{
+              padding: '6px 12px',
+              borderRadius: '20px',
+              border: '1px solid #ddd',
+              backgroundColor: isPrivate ? '#f0f0f0' : '#fff',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: '500',
+              color: '#333',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isPrivate ? '#e8e8e8' : '#f5f5f5';
+              e.currentTarget.style.borderColor = '#999';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = isPrivate ? '#f0f0f0' : '#fff';
+              e.currentTarget.style.borderColor = '#ddd';
+            }}
+            title={isPrivate ? "Currently Private - Only you can see this post" : "Currently Public - Everyone can see this post"}
+          >
+            {isPrivate ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.72-7 8.77V11.99z"/>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z"/>
+              </svg>
+            )}
+            {isPrivate ? "Make Public" : "Make Private"}
+          </button>
+        </div>
+
         {imagePreview && (
           <div className="_mar_t16 _mar_b16" style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
             <img
