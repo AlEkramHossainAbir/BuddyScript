@@ -51,7 +51,7 @@ ConnectDb(MONGODB_URI);
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
-app.use('/api/comments', commentRoutes);
+// app.use('/api/comments', commentRoutes);
 
 // Root route - Welcome page
 app.get('/', (req, res) => {

@@ -631,7 +631,7 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
         </button>
       </div>
 
-      <Comments postId={localPost._id} ref={commentsRef} onCommentsCountChange={setCommentCount} />
+      <Comments postId={localPost._id} ref={commentsRef} onCommentsCountChange={setCommentCount} initialComments={localPost.comments} shouldAutoLoad={false} />
 
       {/* Reactors Modal */}
       {showReactorsModal && localPost.reactions && localPost.reactions.length > 0 && (

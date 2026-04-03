@@ -94,19 +94,10 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
     }));
 
     const loadComments = useCallback(async (forceReload = false) => {
-      if (isLoadingComments || (commentsLoaded && !forceReload)) return;
-      
-      setIsLoadingComments(true);
-      try {
-        const response = await api.get(`/comments/post/${postId}`);
-        setComments(response.data.comments || []);
-        setCommentsLoaded(true);
-      } catch {
-        toast.error("Failed to load comments");
-      } finally {
-        setIsLoadingComments(false);
-      }
-    }, [commentsLoaded, isLoadingComments, postId]);
+      // Comments are loaded from initialComments prop from the post
+      // No need to call separate API
+      setCommentsLoaded(true);
+    }, []);
 
     useEffect(() => {
       if (initialComments !== undefined) {
@@ -178,22 +169,25 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
 
       try {
         const formData = new FormData();
-        formData.append("postId", postId);
         formData.append("content", commentContent);
         if (commentImage) {
           formData.append("image", commentImage);
         }
 
-        await api.post("/comments", formData, {
+        const response = await api.post(`/posts/${postId}/comment`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
 
+        // Update comments state with the updated post's comments
+        if (response.data.post && response.data.post.comments) {
+          setComments(response.data.post.comments);
+        }
+
         setCommentContent("");
         setCommentImage(null);
         setCommentImagePreview("");
-        await loadComments(true); // Force reload to show new comment
         toast.success("Comment added!");
       } catch {
         toast.error("Failed to add comment");
@@ -220,16 +214,20 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
           formData.append("image", replyImage[commentId]!);
         }
 
-        await api.post(`/comments/${commentId}/reply`, formData, {
+        const response = await api.post(`/posts/${postId}/comment/${commentId}/reply`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
 
+        // Update comments state with the updated post's comments
+        if (response.data.post && response.data.post.comments) {
+          setComments(response.data.post.comments);
+        }
+
         setReplyContent({ ...replyContent, [commentId]: "" });
         setReplyImage({ ...replyImage, [commentId]: null });
         setReplyImagePreview({ ...replyImagePreview, [commentId]: "" });
-        await loadComments(true); // Force reload to show new reply
         toast.success("Reply added!");
       } catch {
         toast.error("Failed to add reply");
@@ -241,9 +239,15 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
       reactionType: ReactionType
     ) => {
       try {
-        await api.post(`/comments/${commentId}/like`, { reactionType });
+        const response = await api.post(`/posts/${postId}/comment/${commentId}/react`, { 
+          reactionType 
+        });
+        
+        // Update comments state with the updated post's comments
+        if (response.data.post && response.data.post.comments) {
+          setComments(response.data.post.comments);
+        }
         setShowReactionPicker({ ...showReactionPicker, [commentId]: false });
-        await loadComments(true); // Force reload to show updated reactions
       } catch {
         toast.error("Failed to react to comment");
       }

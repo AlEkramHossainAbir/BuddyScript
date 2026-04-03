@@ -57,7 +57,8 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       author: req.userId,
       content,
       isPrivate: isPrivate === 'true' || isPrivate === true,
-      image: req.file ? `/uploads/${req.file.filename}` : null
+      image: req.file ? `/uploads/${req.file.filename}` : null,
+      comments: []
     });
 
     await post.save();
@@ -99,6 +100,30 @@ router.get('/', authMiddleware, async (req, res) => {
         path: 'reactions.user',
         select: 'firstName lastName profilePicture'
       })
+      .populate({
+        path: 'comments.author',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'comments.likes',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'comments.reactions.user',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'comments.replies.author',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'comments.replies.likes',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'comments.replies.reactions.user',
+        select: 'firstName lastName profilePicture'
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -130,6 +155,30 @@ router.get('/:id', authMiddleware, async (req, res) => {
       })
       .populate({
         path: 'reactions.user',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'comments.author',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'comments.likes',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'comments.reactions.user',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'comments.replies.author',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'comments.replies.likes',
+        select: 'firstName lastName profilePicture'
+      })
+      .populate({
+        path: 'comments.replies.reactions.user',
         select: 'firstName lastName profilePicture'
       });
 
@@ -241,6 +290,30 @@ router.put('/:id', authMiddleware, async (req, res) => {
       path: 'reactions.user',
       select: 'firstName lastName profilePicture'
     });
+    await post.populate({
+      path: 'comments.author',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.author',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
 
     res.json({ message: 'Post updated successfully', post });
   } catch (error) {
@@ -266,6 +339,200 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     res.json({ message: 'Post deleted successfully' });
   } catch (error) {
     console.error('Delete post error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Add comment to post
+router.post('/:id/comment', authMiddleware, upload.single('image'), async (req, res) => {
+  try {
+    const { content } = req.body;
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    if (!content && !req.file) {
+      return res.status(400).json({ error: 'Comment content or image is required' });
+    }
+
+    const commentData = {
+      author: req.userId,
+      content: content || '',
+      replies: [],
+      likes: [],
+      reactions: []
+    };
+
+    if (req.file) {
+      commentData.image = '/uploads/' + req.file.filename;
+    }
+
+    // Push comment into post's comments array
+    post.comments.push(commentData);
+    await post.save();
+
+    // Populate all comment data
+    await post.populate({
+      path: 'comments.author',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.author',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
+
+    res.status(201).json({ 
+      message: 'Comment added successfully', 
+      post 
+    });
+  } catch (error) {
+    console.error('Add comment error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Add reply to comment in post
+router.post('/:id/comment/:commentId/reply', authMiddleware, upload.single('image'), async (req, res) => {
+  try {
+    const { content } = req.body;
+    const { id: postId, commentId } = req.params;
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    if (!content && !req.file) {
+      return res.status(400).json({ error: 'Reply content or image is required' });
+    }
+
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    const replyData = {
+      author: req.userId,
+      content: content || '',
+      likes: [],
+      reactions: []
+    };
+
+    if (req.file) {
+      replyData.image = '/uploads/' + req.file.filename;
+    }
+
+    // Push reply into comment's replies array
+    comment.replies.push(replyData);
+    await post.save();
+
+    // Populate all data
+    await post.populate({
+      path: 'comments.author',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.author',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
+
+    res.status(201).json({ 
+      message: 'Reply added successfully', 
+      post 
+    });
+  } catch (error) {
+    console.error('Add reply error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// React to comment in post
+router.post('/:id/comment/:commentId/react', authMiddleware, async (req, res) => {
+  try {
+    const { reactionType } = req.body;
+    const { id: postId, commentId } = req.params;
+
+    if (!reactionType) {
+      return res.status(400).json({ error: 'Reaction type is required' });
+    }
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    // Remove existing reaction from this user
+    comment.reactions = comment.reactions.filter(
+      reaction => reaction.user.toString() !== req.userId.toString()
+    );
+
+    // Add new reaction if provided
+    if (reactionType) {
+      comment.reactions.push({
+        user: req.userId,
+        type: reactionType
+      });
+    }
+
+    // Also handle legacy likes
+    const likeIndex = comment.likes.indexOf(req.userId);
+    if (reactionType === 'like') {
+      if (likeIndex === -1) {
+        comment.likes.push(req.userId);
+      }
+    } else {
+      if (likeIndex > -1) {
+        comment.likes.splice(likeIndex, 1);
+      }
+    }
+
+    await post.save();
+    await post.populate({
+      path: 'comments.reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.likes',
+      select: 'firstName lastName profilePicture'
+    });
+
+    res.json({ 
+      message: 'Comment reaction updated',
+      post
+    });
+  } catch (error) {
+    console.error('React to comment error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
