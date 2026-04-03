@@ -23,7 +23,7 @@ interface Reply {
   createdAt: string;
 }
 
-interface Comment {
+export interface Comment {
   _id: string;
   content: string;
   image?: string;
@@ -37,7 +37,8 @@ interface Comment {
 interface CommentsProps {
   postId: string;
   onCommentsCountChange?: (count: number) => void;
-  initiallyExpanded?: boolean;
+  initialComments?: Comment[];
+  shouldAutoLoad?: boolean;
 }
 
 export interface CommentsHandle {
@@ -45,9 +46,9 @@ export interface CommentsHandle {
 }
 
 const Comments = forwardRef<CommentsHandle, CommentsProps>(
-  ({ postId, onCommentsCountChange, initiallyExpanded = false }, ref) => {
+  ({ postId, onCommentsCountChange, initialComments, shouldAutoLoad = true }, ref) => {
     const { user } = useAuth();
-    const [comments, setComments] = useState<Comment[]>([]);
+    const [comments, setComments] = useState<Comment[]>(initialComments ?? []);
     const [commentContent, setCommentContent] = useState("");
     const [commentImage, setCommentImage] = useState<File | null>(null);
     const [commentImagePreview, setCommentImagePreview] = useState<string>("");
@@ -73,7 +74,9 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
     const [showReactorsModal, setShowReactorsModal] = useState<{
       [key: string]: boolean;
     }>({});
-    const [commentsLoaded, setCommentsLoaded] = useState(initiallyExpanded);
+    const [commentsLoaded, setCommentsLoaded] = useState(
+      initialComments !== undefined
+    );
     const [isLoadingComments, setIsLoadingComments] = useState(false);
     const commentImageInputRef = useRef<HTMLInputElement>(null);
     const commentInputRef = useRef<HTMLTextAreaElement>(null);
@@ -91,7 +94,7 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
     }));
 
     const loadComments = useCallback(async (forceReload = false) => {
-      if (commentsLoaded && !forceReload) return; // Don't reload if already loaded unless forced
+      if (isLoadingComments || (commentsLoaded && !forceReload)) return;
       
       setIsLoadingComments(true);
       try {
@@ -103,14 +106,19 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
       } finally {
         setIsLoadingComments(false);
       }
-    }, [commentsLoaded, postId]);
+    }, [commentsLoaded, isLoadingComments, postId]);
 
-    // Only load comments when initiallyExpanded is true
     useEffect(() => {
-      if (initiallyExpanded) {
+      if (initialComments !== undefined) {
+        setComments(initialComments);
+        setCommentsLoaded(true);
+        return;
+      }
+
+      if (shouldAutoLoad) {
         loadComments();
       }
-    }, [initiallyExpanded, loadComments]);
+    }, [initialComments, loadComments, shouldAutoLoad]);
 
     useEffect(() => {
       if (onCommentsCountChange) {
@@ -316,7 +324,6 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
           <form
             className="_feed_inner_comment_box_form"
             onSubmit={handleCommentSubmit}
-            onClick={() => !commentsLoaded && loadComments()} // Load comments when user clicks to comment
           >
             <div className="_feed_inner_comment_box_content">
               <div className="_feed_inner_comment_box_content_image">
@@ -446,7 +453,7 @@ const Comments = forwardRef<CommentsHandle, CommentsProps>(
             {/* Render Comments */}
             {visibleComments.map((comment) => {
               const userReaction = comment.reactions?.find(
-                (r) => r.user._id === user?.id
+                (r) => r?.user?._id === user?.id
               );
               const reactionSummary = getReactionSummary(comment);
 

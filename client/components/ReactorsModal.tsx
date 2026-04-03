@@ -196,9 +196,12 @@ export default function ReactorsModal({ reactions, onClose }: ReactorsModalProps
             flex: 1,
           }}
         >
-          {reactions.map((reaction, index) => (
+          {reactions.map((reaction, index) => {
+            const reactor = reaction.user;
+
+            return (
             <div
-              key={`${reaction.user._id}-${index}`}
+              key={`${reactor?._id || "unknown"}-${index}`}
               style={{
                 padding: "8px 20px",
                 display: "flex",
@@ -215,8 +218,8 @@ export default function ReactorsModal({ reactions, onClose }: ReactorsModalProps
             >
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <img
-                  src={reaction.user.profilePicture}
-                  alt={`${reaction.user.firstName} ${reaction.user.lastName}`}
+                    src={reactor?.profilePicture || "assets/images/comment_img.png"}
+                    alt={reactor ? `${reactor.firstName} ${reactor.lastName}` : "Unknown user"}
                   style={{
                     width: "40px",
                     height: "40px",
@@ -233,7 +236,7 @@ export default function ReactorsModal({ reactions, onClose }: ReactorsModalProps
                       color: "#050505",
                     }}
                   >
-                    {reaction.user.firstName} {reaction.user.lastName}
+                    {reactor ? `${reactor.firstName} ${reactor.lastName}` : "Unknown user"}
                   </h4>
                 </div>
               </div>
@@ -258,7 +261,8 @@ export default function ReactorsModal({ reactions, onClose }: ReactorsModalProps
                 </span>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

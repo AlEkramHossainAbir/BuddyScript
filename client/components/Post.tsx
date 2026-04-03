@@ -43,16 +43,16 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
 
   // Find user's reaction if any
   const userReaction = localPost.reactions?.find(
-    (reaction) => reaction.user._id === user?.id
+    (reaction) => reaction?.user?._id === user?.id
   );
-  const isLiked = localPost.likes.some((like) => like._id === user?.id);
+  const isLiked = localPost.likes.some((like) => like?._id === user?.id);
 
   const handleReaction = async (reactionType: ReactionType) => {
     try {
       // Optimistic update - update UI immediately
       const optimisticReactions = [...(localPost.reactions || [])];
       const existingReactionIndex = optimisticReactions.findIndex(
-        (r) => r.user._id === user?.id
+        (r) => r?.user?._id === user?.id
       );
 
       if (existingReactionIndex !== -1) {
@@ -445,8 +445,16 @@ export default function Post({ post, onUpdate, onPostUpdate }: PostProps) {
             // Get unique users who reacted or liked
             const uniqueUsers = new Map<string, AppUser>();
 
-            localPost.reactions?.forEach(r => uniqueUsers.set(r.user._id, r.user));
-            localPost.likes?.forEach(l => uniqueUsers.set(l._id, l));
+            localPost.reactions?.forEach((reaction) => {
+              if (reaction?.user?._id) {
+                uniqueUsers.set(reaction.user._id, reaction.user);
+              }
+            });
+            localPost.likes?.forEach((like) => {
+              if (like?._id) {
+                uniqueUsers.set(like._id, like);
+              }
+            });
 
             const users = Array.from(uniqueUsers.values()).slice(0, 5);
             const totalCount = uniqueUsers.size;
