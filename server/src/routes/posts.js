@@ -374,6 +374,7 @@ router.post('/:id/comment', authMiddleware, upload.single('image'), async (req, 
     await post.save();
 
     // Populate all comment data
+    await post.populate('author', 'firstName lastName profilePicture');
     await post.populate({
       path: 'comments.author',
       select: 'firstName lastName profilePicture'
@@ -396,6 +397,14 @@ router.post('/:id/comment', authMiddleware, upload.single('image'), async (req, 
     });
     await post.populate({
       path: 'comments.replies.reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'reactions.user',
       select: 'firstName lastName profilePicture'
     });
 
@@ -445,8 +454,17 @@ router.post('/:id/comment/:commentId/reply', authMiddleware, upload.single('imag
     await post.save();
 
     // Populate all data
+    await post.populate('author', 'firstName lastName profilePicture');
     await post.populate({
       path: 'comments.author',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.reactions.user',
       select: 'firstName lastName profilePicture'
     });
     await post.populate({
@@ -459,6 +477,14 @@ router.post('/:id/comment/:commentId/reply', authMiddleware, upload.single('imag
     });
     await post.populate({
       path: 'comments.replies.reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'reactions.user',
       select: 'firstName lastName profilePicture'
     });
 
@@ -518,12 +544,37 @@ router.post('/:id/comment/:commentId/react', authMiddleware, async (req, res) =>
     }
 
     await post.save();
+    await post.populate('author', 'firstName lastName profilePicture');
+    await post.populate({
+      path: 'comments.author',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.likes',
+      select: 'firstName lastName profilePicture'
+    });
     await post.populate({
       path: 'comments.reactions.user',
       select: 'firstName lastName profilePicture'
     });
     await post.populate({
-      path: 'comments.likes',
+      path: 'comments.replies.author',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'comments.replies.reactions.user',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'likes',
+      select: 'firstName lastName profilePicture'
+    });
+    await post.populate({
+      path: 'reactions.user',
       select: 'firstName lastName profilePicture'
     });
 
