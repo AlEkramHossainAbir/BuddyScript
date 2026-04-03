@@ -44,8 +44,6 @@ const upload = multer({
 // Create post
 router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   try {
-    console.log('Request body:', req.body);
-    console.log('Request file:', req.file);
     
     const { content, isPrivate } = req.body;
 
@@ -64,7 +62,6 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
     await post.save();
     await post.populate('author', 'firstName lastName profilePicture');
 
-    console.log('Post created successfully:', post._id);
     res.status(201).json({ message: 'Post created successfully', post });
   } catch (error) {
     console.error('Create post error:', error);
