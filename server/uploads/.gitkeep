@@ -1,0 +1,7 @@
+# Keep this file to ensure uploads directory exists
+# Uploaded files will be stored here
+*.jpg
+*.jpeg
+*.png
+*.gif
+!.gitkeep
