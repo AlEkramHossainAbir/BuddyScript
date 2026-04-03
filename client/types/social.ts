@@ -30,4 +30,20 @@ export interface PostType {
   reactions: Reaction[];
   isPrivate: boolean;
   createdAt: string;
+  comments?: Array<{
+    _id: string;
+    content: string;
+    image?: string;
+    author: AppUser;
+    likes: AppUser[];
+    reactions?: Reaction[];
+    replies: Array<{
+      _id: string;
+      content: string;
+      author: AppUser;
+      likes: AppUser[];
+      createdAt: string;
+    }>;
+    createdAt: string;
+  }>;
 }
