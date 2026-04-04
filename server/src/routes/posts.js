@@ -1,17 +1,23 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises;
+const fsSync = require('fs');
+const fileType = require('file-type');
 const authMiddleware = require('../middleware/auth');
 const Post = require('../models/Post');
 const User = require('../models/User');
+
+// Constants for validation
+const MAX_CONTENT_LENGTH = 10000;
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
 
 const router = express.Router();
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+if (!fsSync.existsSync(uploadsDir)) {
+  fsSync.mkdirSync(uploadsDir, { recursive: true });
 }
 
 
@@ -41,8 +47,61 @@ const upload = multer({
   }
 });
 
+// Validate uploaded file using magic number detection
+const validateFileType = async (filePath) => {
+  try {
+    const buffer = await fs.readFile(filePath);
+    const type = await fileType.fileTypeFromBuffer(buffer);
+    if (!type) {
+      console.error('Could not detect file type');
+      return false;
+    }
+    const isValid = ALLOWED_MIME_TYPES.includes(type.mime);
+    if (!isValid) {
+      console.error(`Invalid MIME type detected: ${type.mime}`);
+    }
+    return isValid;
+  } catch (error) {
+    console.error('File type validation error:', error);
+    return false;
+  }
+};
+
+// Middleware to handle multer errors gracefully
+const handleMulterError = (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'FILE_TOO_LARGE') {
+      return res.status(413).json({ 
+        error: 'File too large. Maximum file size is 5MB' 
+      });
+    }
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ 
+        error: 'File too large. Maximum file size is 5MB' 
+      });
+    }
+    if (err.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({ 
+        error: 'Only one file can be uploaded' 
+      });
+    }
+  }
+  
+  if (err && err.message) {
+    if (err.message.includes('Only images')) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
+  
+  next(err);
+};
+
 // Create post
-router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
+router.post('/', authMiddleware, (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    handleMulterError(err, req, res, next);
+  });
+}, async (req, res) => {
   try {
     
     const { content, isPrivate } = req.body;
@@ -51,9 +110,27 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'Content is required' });
     }
 
+    // Validate content length to prevent DoS
+    if (content.length > MAX_CONTENT_LENGTH) {
+      // Clean up uploaded file if it exists
+      if (req.file) {
+        await fs.unlink(req.file.path).catch(err => console.error('File cleanup error:', err));
+      }
+      return res.status(400).json({ error: `Content too long (max ${MAX_CONTENT_LENGTH} characters)` });
+    }
+
+    // Validate file type using magic numbers if file is uploaded
+    if (req.file) {
+      const isValidFile = await validateFileType(req.file.path);
+      if (!isValidFile) {
+        await fs.unlink(req.file.path).catch(err => console.error('File cleanup error:', err));
+        return res.status(400).json({ error: 'Invalid image file. Only JPEG, PNG, and GIF are allowed' });
+      }
+    }
+
     const post = new Post({
       author: req.userId,
-      content,
+      content: content.trim(),
       isPrivate: isPrivate === 'true' || isPrivate === true,
       image: req.file ? `/uploads/${req.file.filename}` : null,
       comments: []
@@ -66,6 +143,10 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   } catch (error) {
     console.error('Create post error:', error);
     console.error('Error stack:', error.stack);
+    // Clean up uploaded file on error
+    if (req.file) {
+      await fs.unlink(req.file.path).catch(err => console.error('File cleanup error:', err));
+    }
     res.status(500).json({ error: error.message || 'Server error' });
   }
 });
@@ -300,7 +381,12 @@ router.put('/:id', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Content is required' });
     }
 
-    post.content = content;
+    // Validate content length to prevent DoS
+    if (content.length > MAX_CONTENT_LENGTH) {
+      return res.status(400).json({ error: `Content too long (max ${MAX_CONTENT_LENGTH} characters)` });
+    }
+
+    post.content = content.trim();
     await post.save();
     await post.populate('author', 'firstName lastName profilePicture');
     await post.populate({
@@ -356,6 +442,15 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to delete this post' });
     }
 
+    // Delete associated image file if it exists
+    if (post.image) {
+      const filePath = path.join(uploadsDir, path.basename(post.image));
+      await fs.unlink(filePath).catch(err => {
+        // Log error but don't fail the deletion if file cleanup fails
+        console.error('File cleanup error:', err);
+      });
+    }
+
     await post.deleteOne();
     res.json({ message: 'Post deleted successfully' });
   } catch (error) {
@@ -365,7 +460,11 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 });
 
 // Add comment to post
-router.post('/:id/comment', authMiddleware, upload.single('image'), async (req, res) => {
+router.post('/:id/comment', authMiddleware, (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    handleMulterError(err, req, res, next);
+  });
+}, async (req, res) => {
   try {
     const { content } = req.body;
     const post = await Post.findById(req.params.id);
@@ -378,9 +477,26 @@ router.post('/:id/comment', authMiddleware, upload.single('image'), async (req, 
       return res.status(400).json({ error: 'Comment content or image is required' });
     }
 
+    // Validate content length if provided
+    if (content && content.length > MAX_CONTENT_LENGTH) {
+      if (req.file) {
+        await fs.unlink(req.file.path).catch(err => console.error('File cleanup error:', err));
+      }
+      return res.status(400).json({ error: `Content too long (max ${MAX_CONTENT_LENGTH} characters)` });
+    }
+
+    // Validate file type using magic numbers if file is uploaded
+    if (req.file) {
+      const isValidFile = await validateFileType(req.file.path);
+      if (!isValidFile) {
+        await fs.unlink(req.file.path).catch(err => console.error('File cleanup error:', err));
+        return res.status(400).json({ error: 'Invalid image file. Only JPEG, PNG, and GIF are allowed' });
+      }
+    }
+
     const commentData = {
       author: req.userId,
-      content: content || '',
+      content: content ? content.trim() : '',
       replies: [],
       likes: [],
       reactions: []
@@ -440,7 +556,11 @@ router.post('/:id/comment', authMiddleware, upload.single('image'), async (req, 
 });
 
 // Add reply to comment in post
-router.post('/:id/comment/:commentId/reply', authMiddleware, upload.single('image'), async (req, res) => {
+router.post('/:id/comment/:commentId/reply', authMiddleware, (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    handleMulterError(err, req, res, next);
+  });
+}, async (req, res) => {
   try {
     const { content } = req.body;
     const { id: postId, commentId } = req.params;
@@ -454,6 +574,23 @@ router.post('/:id/comment/:commentId/reply', authMiddleware, upload.single('imag
       return res.status(400).json({ error: 'Reply content or image is required' });
     }
 
+    // Validate content length if provided
+    if (content && content.length > MAX_CONTENT_LENGTH) {
+      if (req.file) {
+        await fs.unlink(req.file.path).catch(err => console.error('File cleanup error:', err));
+      }
+      return res.status(400).json({ error: `Content too long (max ${MAX_CONTENT_LENGTH} characters)` });
+    }
+
+    // Validate file type using magic numbers if file is uploaded
+    if (req.file) {
+      const isValidFile = await validateFileType(req.file.path);
+      if (!isValidFile) {
+        await fs.unlink(req.file.path).catch(err => console.error('File cleanup error:', err));
+        return res.status(400).json({ error: 'Invalid image file. Only JPEG, PNG, and GIF are allowed' });
+      }
+    }
+
     const comment = post.comments.id(commentId);
     if (!comment) {
       return res.status(404).json({ error: 'Comment not found' });
@@ -461,7 +598,7 @@ router.post('/:id/comment/:commentId/reply', authMiddleware, upload.single('imag
 
     const replyData = {
       author: req.userId,
-      content: content || '',
+      content: content ? content.trim() : '',
       likes: [],
       reactions: []
     };
