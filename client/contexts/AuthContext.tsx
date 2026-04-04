@@ -12,7 +12,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
-  googleLogin: (idToken: string) => Promise<void>;
+  googleLogin: (codeOrToken: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -72,9 +72,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const googleLogin = async (idToken: string) => {
+  const googleLogin = async (codeOrToken: string) => {
     try {
-      const response = await api.post('/auth/google', { idToken });
+      // Send credential to backend - it could be either authorization code or access token
+      // Backend will detect and handle appropriately
+      const response = await api.post('/auth/google', { 
+        token: codeOrToken  // Send as token for backward compatibility
+      });
       localStorage.setItem('token', response.data.token);
       setUser(response.data.user);
       toast.success('Google login successful!');

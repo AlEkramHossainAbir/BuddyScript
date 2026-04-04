@@ -9,6 +9,14 @@ const postRoutes = require('./routes/posts');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+// ===== SECURITY: Validate environment variables =====
+const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI'];
+const missingVars = requiredEnvVars.filter(v => !process.env[v]);
+if (missingVars.length > 0) {
+  console.error(`CRITICAL ERROR: Missing required environment variables: ${missingVars.join(', ')}`);
+  process.exit(1);
+}
+
 // CORS configuration for production
 const allowedOrigins = [
   'http://localhost:3000',
@@ -40,12 +48,24 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ===== SECURITY: Set security headers =====
+app.use((req, res, next) => {
+  // Prevent clickjacking
+  res.setHeader('X-Frame-Options', 'DENY');
+  // Prevent MIME type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  // Enable XSS protection
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  // Content Security Policy
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'");
+  next();
+});
+
 // Serve static files (uploaded images)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Database connection
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://buddy_script:BUDDYSCRIPT123@cluster0.gjcdlw5.mongodb.net/?appName=Cluster0";
-ConnectDb(MONGODB_URI);
+// Database connection - NO FALLBACK, use environment variable only
+ConnectDb(process.env.MONGODB_URI);
 
 // Routes
 app.use('/api/auth', authRoutes);

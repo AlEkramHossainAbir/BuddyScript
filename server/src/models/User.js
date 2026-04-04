@@ -4,19 +4,24 @@ const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    minlength: 2,
+    maxlength: 50
   },
   lastName: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    minlength: 2,
+    maxlength: 50
   },
   email: {
     type: String,
     required: true,
     unique: true,
     lowercase: true,
-    trim: true
+    trim: true,
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ // Email validation
   },
   password: {
     type: String,
@@ -39,12 +44,33 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  emailVerificationToken: {
+    type: String,
+    default: null
+  },
+  emailVerificationExpires: {
+    type: Date,
+    default: null
+  },
   profilePicture: {
     type: String,
     default: '/assets/images/profile.png'
+  },
+  lastLogin: {
+    type: Date,
+    default: null
+  },
+  accountStatus: {
+    type: String,
+    enum: ['active', 'suspended', 'deleted'],
+    default: 'active'
   }
 }, {
   timestamps: true
 });
+
+// Index for faster lookups and to enforce uniqueness
+userSchema.index({ email: 1 });
+userSchema.index({ googleId: 1 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -14,18 +14,9 @@ export default function GoogleSignInButton({btnText}: {btnText?: string}) {
     onSuccess: async (tokenResponse) => {
       setLoading(true);
       try {
-        // Get user info from Google
-        const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: {
-            Authorization: `Bearer ${tokenResponse.access_token}`,
-          },
-        });
-        await response.json();
-        
-        // Use access token as ID token for backend verification
-        const idToken = tokenResponse.access_token;
-        
-        await googleLogin(idToken);
+        // Send access_token to backend for validation
+        // Backend will extract user info and create/login user
+        await googleLogin(tokenResponse.access_token);
       } catch {
         toast.error('Google login failed. Please try again.');
       } finally {
